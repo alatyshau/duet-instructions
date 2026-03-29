@@ -1,3 +1,7 @@
+---
+name: sddg
+description: SDDG workflow
+---
 # SDDG Workflow
 
 > Сократ + Дедал + Дедал + Гефест

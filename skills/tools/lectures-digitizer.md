@@ -1,3 +1,8 @@
+---
+name: lectures-digitizer
+description: Digitize lecture recordings
+shortcuts: ["оцифруй лекцию"]
+---
 # Skill: LecturesDigitizer
 
 Оцифровка записи лекции через Gemini Gem → структурированный конспект.

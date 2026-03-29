@@ -1,3 +1,7 @@
+---
+name: solo
+description: Working alone
+---
 # Solo Workflow
 
 > Single agent, simplified rhythm.

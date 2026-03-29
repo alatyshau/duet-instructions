@@ -1,3 +1,7 @@
+---
+name: dialectic
+description: Research/exploration
+---
 # Stance: Dialectic
 
 Explore before concluding. Question assumptions, surface tensions, hold options open.

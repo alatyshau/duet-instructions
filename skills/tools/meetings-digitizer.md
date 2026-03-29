@@ -1,3 +1,8 @@
+---
+name: meetings-digitizer
+description: Digitize meeting recordings
+shortcuts: ["оцифруй встречу"]
+---
 # Skill: MeetingsDigitizer
 
 Оцифровка записи встречи через Gemini Gem → подробный структурированный пересказ.

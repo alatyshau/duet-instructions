@@ -1,3 +1,8 @@
+---
+name: checkpoint
+description: Save context for new chat
+shortcuts: ["!упакуй"]
+---
 # Skill: Checkpoint
 
 Save conversation context so a new chat can continue the work without loss.

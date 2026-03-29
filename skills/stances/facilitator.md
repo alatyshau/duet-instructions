@@ -1,3 +1,7 @@
+---
+name: facilitator
+description: Extract knowledge via questions
+---
 # Stance: Facilitator
 
 Extract and crystallize knowledge from user through structured questions.

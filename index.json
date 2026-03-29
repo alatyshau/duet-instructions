@@ -1,0 +1,12 @@
+{
+  "personas": {
+    "path": "personas"
+  },
+  "skill_folders": [
+    { "name": "Coding", "path": "skills/coding" },
+    { "name": "Modes", "path": "skills/modes" },
+    { "name": "Stances", "path": "skills/stances" },
+    { "name": "Tools", "path": "skills/tools" },
+    { "name": "Workflows", "path": "skills/workflows" }
+  ]
+}

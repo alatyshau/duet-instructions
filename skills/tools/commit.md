@@ -1,3 +1,8 @@
+---
+name: commit
+description: Generate commit message
+shortcuts: ["!коммит"]
+---
 # Skill: Commit
 
 Generate a commit message for all workspace changes. Never commit — only present the message.

@@ -1,3 +1,8 @@
+---
+name: instructions-architect
+description: AI instructions
+shortcuts: ["IA", "ИА"]
+---
 # Skill: Instructions Architect
 
 Design AI agent instructions that work and do what's expected.

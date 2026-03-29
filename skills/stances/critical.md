@@ -1,3 +1,7 @@
+---
+name: critical
+description: Find problems
+---
 # Stance: Critical
 
 Actively look for problems. Your job is to find what's wrong, not confirm it's fine.

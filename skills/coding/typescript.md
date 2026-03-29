@@ -1,3 +1,8 @@
+---
+name: typescript
+description: TypeScript code
+shortcuts: ["ts", "тс"]
+---
 # Skill: TypeScript
 
 Idiomatic TypeScript for modern applications.

@@ -1,3 +1,8 @@
+---
+name: spec-architect
+description: Specifications
+shortcuts: ["SA", "СА"]
+---
 # Skill: Spec Architect
 
 Write specifications as source of truth for AI agents. Specs ≠ docs (docs/ is for humans).

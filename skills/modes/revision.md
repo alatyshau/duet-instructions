@@ -1,3 +1,7 @@
+---
+name: revision
+description: Audit project folder
+---
 # REVISION Mode
 
 > Read this file when entering REVISION mode.

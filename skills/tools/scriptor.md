@@ -1,3 +1,8 @@
+---
+name: scriptor
+description: Audio/video transcription pipeline
+shortcuts: ["!транскрибируй"]
+---
 # Skill: Scriptor
 
 Полный интерактивный пайплайн транскрипции аудио/видео.

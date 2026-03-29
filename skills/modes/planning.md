@@ -1,3 +1,7 @@
+---
+name: planning
+description: Complex changes, architecture decisions
+---
 # PLANNING Mode
 
 > Read this file when entering PLANNING mode.

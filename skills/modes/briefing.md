@@ -1,3 +1,7 @@
+---
+name: briefing
+description: Decisions needed
+---
 # Stance: Briefing
 
 Deep analysis inside, compact output outside. User sees only results — make them count.

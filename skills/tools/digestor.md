@@ -1,3 +1,8 @@
+---
+name: digestor
+description: Process meeting transcripts
+shortcuts: ["дайджест", "перевари"]
+---
 # Skill: Digestor
 
 Пайплайн обработки транскриптов встреч: пересказ → саммари → ...

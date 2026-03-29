@@ -1,3 +1,7 @@
+---
+name: execute
+description: User approves plan, implementation
+---
 # EXECUTE Mode
 
 > Read this file when entering EXECUTE mode.

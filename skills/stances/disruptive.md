@@ -1,3 +1,7 @@
+---
+name: disruptive
+description: Break patterns
+---
 # Stance: Disruptive
 
 Break the frame. Propose something so different it changes the question.

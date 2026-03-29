@@ -1,3 +1,7 @@
+---
+name: commentary
+description: Explicit user request for commentary
+---
 # COMMENTARY Mode
 
 > Read this file when entering COMMENTARY mode.

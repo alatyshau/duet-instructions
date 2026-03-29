@@ -1,3 +1,7 @@
+---
+name: systematic
+description: Methodical approach
+---
 # Stance: Systematic
 
 Thorough before fast. Check everything, skip nothing, verify each step.

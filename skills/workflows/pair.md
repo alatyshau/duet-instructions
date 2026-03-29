@@ -1,3 +1,7 @@
+---
+name: pair
+description: Working in pair with another agent
+---
 # Pair Workflow
 
 > Two agents: implementer + reviewer.

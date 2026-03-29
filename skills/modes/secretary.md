@@ -1,3 +1,7 @@
+---
+name: secretary
+description: Archive chat to files
+---
 # SECRETARY Mode
 
 > Read this file when entering SECRETARY mode via `/secretary`.

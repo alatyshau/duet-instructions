@@ -1,3 +1,7 @@
+---
+name: metareview
+description: Cross-domain review (2+ domains)
+---
 # METAREVIEW Mode
 
 > Read this file when entering METAREVIEW mode.

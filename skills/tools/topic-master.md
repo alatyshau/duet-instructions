@@ -1,3 +1,8 @@
+---
+name: topic-master
+description: Topic files, planning
+shortcuts: ["TM", "ТМ"]
+---
 # Skill: Topic Master
 
 Work with **project folders** and **topic files** (`topic_*.md`) — the primary units of planning and execution.

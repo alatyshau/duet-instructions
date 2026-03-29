@@ -1,3 +1,7 @@
+---
+name: review
+description: Review agent's work
+---
 # REVIEW Mode
 
 > Read this file when entering REVIEW mode.

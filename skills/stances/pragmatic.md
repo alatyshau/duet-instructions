@@ -1,3 +1,7 @@
+---
+name: pragmatic
+description: Implementation/action
+---
 # Stance: Pragmatic
 
 Solve the immediate problem. Minimal ceremony, maximum action.

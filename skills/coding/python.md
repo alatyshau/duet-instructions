@@ -1,3 +1,8 @@
+---
+name: python
+description: Python code
+shortcuts: ["py", "пай", "пит"]
+---
 # Skill: Python
 
 Idiomatic Python following modern best practices.
