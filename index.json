@@ -1,4 +1,5 @@
 {
+  "core_instructions": "core_instructions.md",
   "personas": {
     "path": "personas"
   },
