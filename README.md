@@ -4,12 +4,24 @@
 
 ## Что это
 
-Персональная база инструкций для AI-агентов: персоны, скиллы, схемы, скрипты. Duet Host подключает этот воркспейс через свою конфигурацию, и тогда все локальные ИИ-агенты пользуются этими инструкциями и могут их здесь же редактировать. Агенты читают `index.md` как входную точку.
+Персональная база инструкций для AI-агентов: персоны, скиллы, core-правила, схемы, скрипты.
+
+Duet Host подключает этот воркспейс через конфигурацию (`instructionsPath` в `DuetConfig/{machine}.json`). Backend читает `index.json` для построения каталога, а `core_instructions.md` компонуется с платформенным bootstrapper'ом в единый output-style для AI-клиентов.
+
+## Двуслойная архитектура
+
+| Слой | Где | Что | Кто владеет |
+|------|-----|-----|-------------|
+| **Bootstrapper** | `packages/backend/bootstrapper.md` (в Duet) | Ориентация, глоссарий, three roots | Duet (платформа) |
+| **Core instructions** | `core_instructions.md` (здесь) | Правила (L7+, honesty, safe, review), observable rules, spec-driven | Пользователь |
+
+Backend компонует оба слоя через маркер `<!-- INSERT USER CORE INSTRUCTIONS -->` → готовый merged output для AI-клиентов.
 
 ## Структура
 
 ```
-index.md                    ← входной файл (каталоги персон и скиллов)
+index.json                  ← декларация структуры (core_instructions, personas, skill_folders)
+core_instructions.md        ← пользовательские правила для AI-агентов
 personas/                   ← WHO — идентичности агента на сессию
   socrates.md
   hephaestus.md
@@ -24,6 +36,21 @@ schemas/                    ← форматы файлов (topic_file, index, 
 scripts/                    ← Python-код для сложных скиллов
 ```
 
+## index.json
+
+Декларирует структуру воркспейса. Backend использует его для построения каталога в `workspace_info` и для нахождения `core_instructions.md`.
+
+```json
+{
+  "core_instructions": "core_instructions.md",
+  "personas": { "path": "personas" },
+  "skill_folders": [
+    { "name": "Coding", "path": "skills/coding" },
+    { "name": "Modes", "path": "skills/modes" }
+  ]
+}
+```
+
 ## Система концепций
 
 | Концепция | Вопрос | Длительность |
@@ -32,3 +59,18 @@ scripts/                    ← Python-код для сложных скилло
 | **Skill** | ЧТО я знаю / умею? | По запросу |
 
 Modes, stances, workflows — категории скиллов.
+
+## YAML frontmatter
+
+Каждый `.md` файл персоны/скилла содержит YAML frontmatter:
+
+```yaml
+---
+name: socrates
+description: Research, dialectics
+shortcuts: ["Сократ"]
+---
+```
+
+- **Обязательные:** `name`, `description`
+- **Опциональные:** `shortcuts` (список), `trigger`, `noTrigger` (только скиллы)
