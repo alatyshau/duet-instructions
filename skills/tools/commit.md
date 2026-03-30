@@ -1,7 +1,7 @@
 ---
 name: commit
 description: Generate commit message
-shortcuts: ["!коммит"]
+shortcuts: ["!коммит", "!комит"]
 ---
 # Skill: Commit
 

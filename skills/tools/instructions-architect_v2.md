@@ -43,6 +43,13 @@ If you find yourself writing ALWAYS or NEVER in all caps, or stacking rigid MUST
 Bad: `NEVER use markdown links for paths`
 Good: `Use backticks for paths (`` `skills/modes/planning.md` ``), not md-links — md-links break when instructions are loaded from varying nesting depths`
 
+**Leading WHY pattern:** The strongest instructions open with the reason, and the rule follows naturally. The reader understands the motivation before encountering the constraint — which makes the constraint feel obvious rather than imposed.
+
+Bad: `Keep plan.md to one screen. The user reads it to understand the full picture.`
+Good: `The user reads plan.md to understand the full picture without opening other files. Keep it to one screen.`
+
+This pattern comes from `core_instructions.md` L7+ rules — study how each rule's first sentence is a WHY that makes the action self-evident.
+
 ### Progressive Disclosure
 
 Skills use a three-level loading system. Write with this in mind:
@@ -56,7 +63,7 @@ If approaching 500 lines, add hierarchy: split into a main file with pointers to
 ### Keep It Lean
 
 After writing, reread with fresh eyes and cut anything that isn't pulling its weight. Signs of bloat:
-- Context the agent already has from bootstrapper or `index.md`
+- Context the agent already has from its system prompt (L7+ rules, project management, spec-driven development, glossary — all always present). Don't restate rules like `[tradeoff]`, `[verify]`, `[honest]`, project folder conventions, or plan.md structure
 - Knowledge the agent has built-in (don't teach it Python — teach it YOUR conventions)
 - Descriptions of behavior instead of prescriptions ("X is important" → "When X, do Y")
 - Rules that exist "just in case" with no concrete scenario
