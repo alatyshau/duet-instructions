@@ -2,6 +2,7 @@
 name: commit
 description: Generate commit message
 shortcuts: ["!коммит", "!комит"]
+trigger: "User asks to commit, prepare a commit, write a commit message, or review changes for committing."
 ---
 # Skill: Commit
 

@@ -11,38 +11,86 @@ A batch of 7 decisions in one response means each gets ~15% of thinking — shal
 
 ## Algorithm
 
-### Phase 1: Build index
+### Phase 1: Build index + choose fixation strategy
 
 The index is a dumb map — titles and pointers, not analysis. Deep thinking happens later, one issue at a time.
 
 1. Scan source (file, conversation, agent reports) for issues needing resolution
 2. Filter out already-resolved items (check by title only, don't deep-scan yet)
 3. For each remaining issue: extract title + where to find context
-4. Write `briefing_<case_name>.md` in the project folder
-5. Link it from `plan.md` (so the next session knows there's an active briefing)
-6. Show the index to user for confirmation — they may reorder, remove, or add
+4. **Choose fixation strategy** (see below). Assess whether issues are independent or interconnected. Write the strategy in the briefing file header.
+5. Write `briefing_<case_name>.md` in the project folder
+6. Link it from `plan.md` (so the next session knows there's an active briefing)
+7. Show the index + chosen strategy. Agent owns the list and order. User approves the strategy — it's the only decision at this phase.
 
-**Example:**
+**Example output at this step:**
+
+```
+5 вопросов:
+
+| # | Вопрос | Контекст |
+|---|--------|----------|
+| 1 | Glossary в system prompt — нужен или дублирует? | core_instructions.md:39-64 |
+| 2 | "Be cautious about deletions" — паника без WHY | core_instructions.md:101 |
+| 3 | Observable rules table — агент её использует? | core_instructions.md:123-138 |
+| 4 | Spec gate — когда читать спеку? | review.md item 3 |
+| 5 | Plan.md растёт — нужен ли лимит? | review.md item 6 |
+
+Стратегия фиксации: **artifact → design_review.md** (вопросы связаны —
+решения формируют документ для следующей сессии).
+```
+
+### Fixation strategy
+
+Decisions made during briefing must survive compaction — if knowledge stays only in chat, it's lost. The strategy determines **where** decisions are materialized.
+
+Choose one at index time. User approves the strategy. Record in briefing file header as `fixation: <strategy>`. The `target` field in header is mandatory for all strategies except `chat` — it names the file(s) where decisions ultimately land.
+
+| Strategy | Where | When to use |
+|----------|-------|-------------|
+| `log` | In the briefing file itself — full decision + reasoning per issue | Issues are interconnected within one document/design. Fixing the target doc after each issue risks rework when a later issue changes context. All decisions first → one coherent pass on the target at the end |
+| `artifact` | In a design doc or review document | Forming an intermediate artifact for another agent (or yourself in a new session) to execute. Typically: design doc for implementation, or review document for fixes |
+| `final` | In code and specs directly | Issues are independent. Each can be fully closed on the spot without affecting others |
+| `chat` | Nowhere — decisions stay in chat, index gets a status label only | **Anti-pattern by default.** Acceptable only for very small briefings (2-3 trivial issues) that fit in one short session with no compaction risk. If in doubt — use `log` instead. The danger: a "small" briefing grows deeper than expected, and by then the decisions are already scattered across chat with no materialization |
+
+**Why not always `final` or `artifact`?** When issues are interconnected, fixing the target after issue 2 may need to be redone after issue 5 changes the context. `log` collects all decisions first, then applies them in one pass.
+
+**Why not always `log`?** When issues are independent, deferring creates unnecessary indirection. Fix it, close it, move on.
+
+**Safety net:** `!упакуй` (checkpoint) walks every chat message and verifies that all decisions made it into files. If something slipped through during fixation — checkpoint catches it.
+
+#### Briefing file header
 
 ```markdown
-# Briefing: instructions review
-source: projects/WIP_instructions_rework/merged_output_review.md
-workflow: solo
+# Briefing: <case name>
+source: <file(s) where issues come from>
+target: <file(s) where decisions land — code, spec, design doc>
+fixation: <strategy>
 
 ## Issues
 
-### 1. Glossary in system prompt — needed or redundant?
-- context: merged_output_review.md, item 4; core_instructions.md:39-64
+### 1. Some issue title
+- context: <pointers>
+- status: **resolved** — <one-line summary>
+
+### 2. Another issue
+- context: <pointers>
 - status: pending
 
-### 2. "Be cautious about deletions" — panic tone without WHY
-- context: merged_output_review.md, item 5; core_instructions.md:101
-- status: pending
+## Solutions
 
-### 3. Observable rules table — does agent use it?
-- context: merged_output_review.md, item 7; core_instructions.md:123-138
-- status: pending
+### 1. Some issue title
+**Decision:** <what we decided>
+**User approved:** "<exact quote>"
+
+<reasoning — free form, as long as needed. May use #### and #####
+subsections to structure complex analysis. May include alternatives
+considered, arguments for and against, nuances from discussion.
+One paragraph or several pages — whatever captures the depth of the
+conversation so a new session doesn't repeat the work.>
 ```
+
+For `final` and `artifact` — the briefing file has only the Issues section (no Solutions). Decisions go directly into `target`.
 
 ### Phase 2: Walk through
 
@@ -64,16 +112,17 @@ For each issue:
 
    If you honestly cannot resolve the issue because the answer depends on a priority only the user knows — then show the fork: what depends on what, what happens in each case. This is not an alternatives table by default — it's a last resort when the analyst has done all the thinking they can and the remaining choice belongs to the human.
 4. **Wait** for decision. FULL STOP. Do not edit files, update index, or print ZERO LOOSE ENDS until the user explicitly approves or rejects. "Согласен?" from you is a question, not a decision. Only the user's reply is a decision.
-5. **Act** based on workflow:
-   - **solo** — fix immediately (context is hot — deferring means losing it)
-   - **pair / sddg** — write task for executor (e.g. `prompt_<name>.md`), record in index
-6. **Update index** — mark status, write decision
+5. **Act** based on fixation strategy:
+   - **`final`** — fix immediately in target (code, spec, design doc). Context is hot — deferring means losing it.
+   - **`log`** — write full decision + reasoning in the Decisions section of the briefing file. Target document is updated in one pass after all issues are resolved.
+   - **`artifact`** — write into the intermediate document (design doc or review doc).
+6. **Update index** — mark status, write one-line summary of decision
 7. **Zero loose ends gate** — before moving to next issue, print this checklist in chat:
 
    ```
    ✅ ZERO LOOSE ENDS:
    - User approved: "<exact user quote>"
-   - Files changed: <list or "none">
+   - Fixated: <where — briefing log / design doc / code+spec>
    - Index updated: <yes/no>
    - Decision recorded: <one-line summary>
    ```
@@ -81,6 +130,11 @@ For each issue:
    The "User approved" field is mandatory. You must quote the user's actual words that constitute approval. If you cannot fill this field — you skipped step 4. Stop, revert any changes, and go back to waiting.
 
    Do NOT present the next issue until this gate is printed and complete.
+
+8. **Ask permission to move on.** After printing ZERO LOOSE ENDS — ask "Идём дальше?" and wait. This is `[review]` applied to briefing: agent cannot see the full picture and cannot mark an issue as closed — only the user can. Move to the next issue ONLY on explicit "да" or "дальше" (or user said "дальше" earlier, before the gate). Everything else means stay:
+   - "Да" in response to "Согласен?" = approval of recommendation, NOT permission to move on
+   - User asks a question or makes a statement ignoring "Идём дальше?" = they're ignoring the question = we're not moving on
+   - User provides additional context, examples, corrections = still on current issue
 
 A single issue may take one message or fifty — don't move on until resolved or deferred.
 
@@ -130,3 +184,4 @@ product). Без неё агент не поймёт "открой бизнес 
 | Skip re-scan before analysis | May already be fixed by another session | Check current file state first |
 | Assume reader has context | Analysis gets forwarded, discussed later | Self-contained from zero |
 | Present alternatives table by default | Listing options is easier than arriving at an answer — that's avoidance, not depth | Do the thinking, come with an answer. Fork only when you genuinely can't resolve without user's priorities |
+| Mark "resolved" without materializing | A status label is not fixation. "Resolved" in index + nothing in files = lost knowledge | Fixate per chosen strategy, then mark |
