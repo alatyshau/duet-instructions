@@ -35,6 +35,7 @@ Look for specific symptoms:
 - Are there completed phases not reflected in ЧТО СДЕЛАНО?
 - Is the goal still accurate or has the project evolved past it?
 - Are design docs still relevant or superseded by implementation?
+- Are files piling up at root without logical grouping? (5+ files at root is a signal — a flat pile is opaque to anyone returning months later, especially in archive)
 
 ### 4. Reconstruct the structure
 
@@ -55,9 +56,13 @@ Report in chat, not in files. Wait for approval before touching anything.
 **Проблемы:**
 - ...
 
+**Организация файлов:**
+- <proposed subfolder structure, e.g. deliverable/, analysis/, input/>
+- <rationale: what goes where and why>
+
 **Предложение:**
 - plan.md: rewrite from scratch
-- Файлы: <archive / rename / restructure>
+- Файлы: <archive / rename / restructure / reorganize into subfolders>
 
 Одобряешь?
 ```
@@ -70,6 +75,8 @@ After the user approves the structure — go deep into each phase one at a time:
 - Clean up files (rename stale docs with `YYMMDD_` prefix, link active ones)
 - Write the milestone for this phase in the new plan.md
 - Show the user — get approval before moving to the next phase
+
+**Reorganize files into subfolders.** Almost always worth doing — project folders go to archive, and clarity matters more there than during active work. Group files by role: outputs (deliverables, analysis results), inputs (reference materials), research. `plan.md` always stays at root — it's the entry point. After moving files, update all links in plan.md.
 
 Don't rush to the next phase. Each one is its own knot to untangle.
 
