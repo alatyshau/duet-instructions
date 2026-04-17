@@ -1,7 +1,7 @@
 ---
-name: project-revision_v2
+name: project-revision
 description: "Deep audit and restructuring of a work folder into a tree of per-task subfolders. Use when plan.md has drifted — bloated past one screen, stale checkboxes, orphaned files, completed phases not reflected — or when the user explicitly asks to clean up a work folder."
-shortcuts: ["ревизия2", "!ревизия2"]
+shortcuts: ["ревизия", "!ревизия"]
 ---
 # Skill: Project Revision (tree-structured)
 

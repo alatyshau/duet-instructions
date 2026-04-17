@@ -81,9 +81,35 @@ Each cycle is the same three moves:
 
 1. **Pick the next active task** from the tree — the folder marked `WIP_<slug>/` whose `plan.md` has actionable `ЧТО ДАЛЬШЕ`.
 2. **Delegate or do.** If the task is bounded and well-scoped, delegate to an agent with a self-contained brief. If it's small and tightly coupled to your current context, do it yourself.
-3. **Reflect reality.** When the agent returns (or you finish), update the relevant `plan.md`(s): move completed items to `ЧТО СДЕЛАНО`, adjust `ЧТО ДАЛЬШЕ`, promote `TODO_` folders to `WIP_` as they start, move closed `WIP_` folders into the parent's `archive/YYMMDD_<slug>/`.
+3. **Reflect reality.** When the agent returns (or you finish), update the relevant `plan.md`(s): move completed items to `ЧТО СДЕЛАНО`, adjust `ЧТО ДАЛЬШЕ`, promote `TODO_` folders to `WIP_` as they start.
 
 Then repeat. Stop only when all `WIP_`/`TODO_` are drained or the user asks you to pause.
+
+## PM doing work directly (temporary mode switch)
+
+Sometimes a task is small and tightly coupled to current context — worth doing directly instead of delegating. PM can temporarily switch to executor mode:
+
+**Before switching to executor:**
+- Update `plan.md`: note what you're about to do
+- Rename `TODO_<slug>/` → `WIP_<slug>/` — signals task is active
+- Write yourself a brief: goal, done criterion, output location
+- **Output to chat:** `🚀 SWITCHING TO EXECUTOR MODE: <task slug>` — explicit marker
+
+**During execution:**
+- Work normally: read, write, execute, log
+- Focus fully on task, don't interrupt with PM-questions
+
+**After returning to PM mode:**
+- **Output to chat:** `🔙 BACK TO PM MODE` — explicit marker
+- Verify artifacts exist and match done criterion
+- Update task's `plan.md`: move work into `ЧТО СДЕЛАНО`
+- **Report to user:** "X complete, here's what was done, artifacts at [path]. OK to archive?"
+- **Wait for explicit user approval** before any archival
+
+**Archival is user's gate only:**
+- On user approval: rename `WIP_<slug>/` → `archive/YYMMDD_<slug>/` (YYMMDD = completion date)
+- Update parent's `plan.md`: move task from `ЧТО ДАЛЬШЕ` to `ЧТО СДЕЛАНО`
+- Never archive without user saying "yes"
 
 ## Before you start the loop
 
