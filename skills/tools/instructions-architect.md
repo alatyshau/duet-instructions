@@ -9,41 +9,43 @@ Design AI agent instructions that work and do what's expected.
 
 ## Core Philosophy
 
-**The only goal is a working agent.** Token cost is NEVER a criterion.
+**The only goal is a working agent.** Token cost is NEVER a criterion. Shorter is easier to parse, focused is more stable — but if longer text works better, use longer. If verbose explanation helps — be verbose.
 
-We make instructions concise NOT to save money, but because:
-- Shorter = easier for agent to parse and follow
-- Focused = less confusion, more stable behavior
-- Clear structure = reliable execution
+## The Reader
 
-If longer text works better — use longer text. If verbose explanation helps — be verbose.
+Every file in this workspace is read by a future agent at runtime. No human opens instruction files to review content — humans correct course through the agent when they see drift. If a sentence doesn't change what the agent does on a turn, it has no reader.
 
-## When to Use
+Cut from files:
 
-- Designing or reviewing instruction files (skills, personas, schemas)
-- Restructuring the instructions workspace
-- Reviewing how well agents follow instructions (signals from checkpoint)
+- **Design rationale** («why this mechanism over another») — agents don't need convincing to apply a rule; they need the rule and its boundaries.
+- **Defence of choices for future maintainers** — no future human maintainers exist.
+- **Documentation framing** («this file describes…», «the purpose of this section is…») — agents orient by content, not by meta.
+- **Leading WHY** (see «Explain the Why») — keep only when removing it changes the agent's interpretation of the rule.
+
+The filter is strictest for always-loaded files (core_instructions.md, output styles). On-demand skills and personas can carry slightly more scaffolding since they load only when their task is active. Default posture: write for the agent executing at runtime.
 
 ## Edit Protocol
 
-Instructions affect all agents on the machine. IA works in the instructions workspace (path from `instructionsPath` in `workspace_info`).
+IA works in the instructions workspace (path from `instructionsPath` in `workspace_info`).
 
-| Action | Who |
-|--------|-----|
-| New file — create in place | IA |
-| Existing file — create `*_v2` next to original | IA |
-| Merge (replace original with v2) | Human |
-| Commit | Human |
-
-IA never deletes, overwrites, or commits instruction files.
+- **All edits** — IA edits in place. There is no human-review checkpoint on file content.
+- **Paradigm shifts** — IA still edits in place, but flags the shift in chat so the user knows to watch for behavioral changes.
+- **Commits** — user commits. IA doesn't commit, doesn't push, doesn't merge to main.
 
 ## How to Write Instructions
 
 ### Explain the Why
 
-LLMs are smart. They have good theory of mind and respond better to understanding motivation than to rote rules. **Every instruction should carry its reason.**
+Two kinds of WHY — only one belongs in the file.
 
-If you find yourself writing ALWAYS or NEVER in all caps, or stacking rigid MUSTs — that's a yellow flag. Reframe: explain the reasoning so the agent understands why this matters. That produces more robust behavior than any amount of shouting.
+- **Behavioral WHY** shapes how the agent interprets and applies the rule at execution time. «Retrospective questions are reasoning requests, not rollback orders» changes how the agent reads user messages. Keep it.
+- **Design-defence WHY** argues for the chosen rule against alternatives. «We chose prediction over checklists because checklists are skimmable» defends a past decision to a reviewer who doesn't exist. Cut it.
+
+Test: remove the WHY. If the agent's execution becomes less certain, keep it. If removal only loses the ability to defend the choice in review, remove it.
+
+LLMs have good theory of mind and respond to behavioral motivation better than to rote rules. **Every rule should carry its behavioral reason.**
+
+If you find yourself writing ALWAYS or NEVER in all caps, or stacking rigid MUSTs — that's a yellow flag. Reframe: explain the behavioral reasoning so the agent understands why this matters at execution. That produces more robust behavior than shouting.
 
 Bad: `NEVER use markdown links for paths`
 Good: `Use backticks for paths (`` `skills/modes/planning.md` ``), not md-links — md-links break when instructions are loaded from varying nesting depths`
@@ -125,12 +127,6 @@ Before editing an existing file:
 - [ ] Is there a schema for this file type? (`schemas/`)
 - [ ] What concrete problem am I fixing? (no edits "for cleanliness")
 
-Before writing content:
-- [ ] Does the agent already know this? (don't repeat built-in knowledge)
-- [ ] Example or explanation? (prefer example)
-- [ ] Did I explain the why behind every non-obvious rule?
-- [ ] Can I cut anything that isn't pulling its weight?
-
 When adding a new skill:
 - [ ] Skill file in `skills/<category>/` following `schemas/skill_file.md`
 - [ ] YAML frontmatter with name, description (and shortcuts/trigger if applicable)
@@ -143,6 +139,7 @@ When adding a new skill:
 | Stack ALWAYS/NEVER/MUST rules | Rigid rules break on edge cases; agents respond better to reasoning | Explain the why, let agent generalize |
 | Repeat bootstrapper or index.md content | Bloat; agent already has it in context | Focus on what only THIS file teaches |
 | Teach built-in knowledge | Waste of tokens and attention | Focus on YOUR specific conventions |
+| Include design-choice defence in always-loaded files («we chose X because Y is worse») | No agent needs convincing at execution time; no human reviews the design. Pure attention cost on every turn | Strip to operational content. Rationale, if preserved at all, goes in commit message or design note outside loaded context — never in the file |
 | Write narrow patches for one-off failures | Accumulates into brittle instructions | Fix the pattern, not the instance |
 | Describe behavior ("X is important") | Agent needs to know what to DO | Prescribe: "When X, do Y" |
 | Deeply nested references (>2 levels) | Agent loses track, costs tokens | Flat: one hop from main file |
