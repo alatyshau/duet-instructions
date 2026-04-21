@@ -28,8 +28,8 @@ The filter is strictest for always-loaded files (core_instructions.md, output st
 
 IA works in the instructions workspace (path from `instructionsPath` in `workspace_info`).
 
-- **All edits** — IA edits in place. There is no human-review checkpoint on file content.
-- **Paradigm shifts** — IA still edits in place, but flags the shift in chat so the user knows to watch for behavioral changes.
+- **Minor edits** — IA edits in place. Small rule additions, wording fixes, anti-pattern additions that don't restructure the file: edit original directly.
+- **Paradigm shifts — generate a sibling `_v2` file, do not edit in place.** A paradigm shift is any change that restructures the skill (new phases/steps, reframed purpose, new mandatory artifacts, changed invariants). Reason: paradigm shifts warrant user review before adoption; side-by-side files (`skill.md` next to `skill_v2.md`) let the user diff, test, and commit when satisfied. Editing in place destroys the comparison and forces the user to trust blind. Flag the paradigm shift in chat, explain what changed, point at the `_v2` file. After user accepts, user replaces original (`mv skill_v2.md skill.md`) — not IA.
 - **Commits** — user commits. IA doesn't commit, doesn't push, doesn't merge to main.
 
 ## How to Write Instructions
