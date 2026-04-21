@@ -75,6 +75,12 @@ The bootstrapper already defines plan.md structure (Goal, ЧТО СДЕЛАНО,
 
 **Details live at the level they matter.** A fact relevant only inside subtask N belongs in subtask N's `plan.md`, not in the parent. The parent orients; the child specifies. If you find yourself explaining a nested detail at the top level — push it down.
 
+## Decomposition discipline
+
+A folder is a commitment to a boundary — dissolving one that shouldn't have been split costs more than holding a topic in text until its boundary is clear. When PM creates a new `TODO_<slug>/` or promotes a topic to its own folder, the task must be bounded: goal and done-criterion stateable in one sentence each. If it isn't, keep it as a topic in the parent's `plan.md` until the boundary clarifies.
+
+**No more than 7 direct children at any level.** Past that, the reader stops seeing shape and starts scanning a list; regroup by theme, adjust granularity, or demote premature folders back to topics in text. Fuller treatment and examples in `skills/tools/project-revision.md` — this rule applies equally during the PM loop and during revisions.
+
 ## The PM loop
 
 Each cycle is the same three moves:

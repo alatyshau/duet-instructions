@@ -15,7 +15,7 @@ Classify subfolders by *task*, not by file role (`deliverable/`, `analysis/`, `i
 
 ## The core rule: one task = one folder
 
-Every bounded chunk of work — with its own goal, its own criterion for "done", and its own artifacts — becomes its own folder. **Always, from the start, even when the folder initially holds only a three-line `plan.md`.** Folder cost is near zero; the cost of carving a buried sub-chunk out of a bloated parent `plan.md` later is high.
+Every **bounded** chunk of work — with its own goal, its own done-criterion, its own artifacts — becomes its own folder. When the task is bounded, create the folder immediately, even if it initially holds only a three-line `plan.md`: carving a buried sub-chunk out of a bloated parent later costs far more than the near-zero cost of a fresh folder. When the task is **not** yet bounded — see `Decomposition discipline` below.
 
 This applies recursively. A task's folder can contain subtask folders; those can contain their own. Depth follows the work, not a rule.
 
@@ -36,6 +36,12 @@ WIP_bigtask/
 **Single filename `plan.md` at every level.** Resist the urge to disambiguate with `plan_moex.md` or `plan_bigtask.md` — it breaks the tree's predictability (automations and readers can no longer assume `plan.md` lives in every folder) and the names inflate with depth. Editor tab labels automatically prefix the parent folder when filenames collide; that solves the ergonomics without breaking the pattern.
 
 **`drafts/` — the only allowed role-based subfolder.** The user's raw material: hand-written notes, pasted snippets, reference inputs they haven't curated yet. This is an authorship boundary, not a file-type grouping: agents don't generate into `drafts/`, don't reorganize or rewrite its contents, don't archive files out of it during revisions. Treat it as read-only unless the user explicitly says otherwise. No other role-based groupings (`output/`, `analysis/`, `input/`) — bounded work that would fill them belongs in its own subtask folder.
+
+## Decomposition discipline
+
+A folder is a commitment to a boundary. Once a task has its own folder, its own `plan.md`, and its own line in the parent index, dissolving it back into text costs more than holding it in text until the boundary is clear. **If you can't state the task's goal and done-criterion in one sentence each, leave it as a topic in the parent's `plan.md` and carve the folder out when the task matures.** This is the counterpart to `one task = one folder`: create the folder eagerly when the task is bounded, hold off when it isn't.
+
+**No more than 7 direct children at any level.** Past that, the reader stops seeing the shape of the work and starts scanning a list. If natural decomposition produces 8+ subtasks, one of three things is happening: (a) some tasks group by theme and belong consolidated one level up, (b) the split is at the wrong granularity — either too fine (collapse several into one) or too coarse (split the parent differently), or (c) not all of them are tasks yet — some are open topics that belong as text in the parent's `plan.md` until they're ready to become folders.
 
 ## File naming inside a work folder
 
@@ -76,9 +82,9 @@ Core conventions — one-screen rule, `Goal` / `ЧТО СДЕЛАНО` / `ЧТО
 
 This is deep work, not a quick pass. A shallow revision — skimming the old plan and reformatting it — reproduces the drift in a prettier layout instead of fixing it. Reconstruct from primary sources (files, git, conversation history), not from the old plan.
 
-### 1. Preserve the old state
+### 1. Rename old plan
 
-Rename the existing `plan.md` → `plan_old.md`. It's your reference and the user's safety net — they can compare old vs new to verify nothing important was lost.
+Rename `plan.md` → `plan_old.md` — user-side backup, invisible to you (any `*_old.*` rename means deleted from your view). Reconstruct from primary sources (step 2).
 
 ### 2. Read everything
 
@@ -161,7 +167,7 @@ The same rule applies to file links, not just subfolder links.
 
 If the parent doesn't fit on one screen, something belongs deeper in the tree.
 
-Leave `plan_old.md` in place after the user approves the final result. **The agent never deletes files in work folders** — the user handles cleanup when they want to. This is unconditional, not a revision-specific rule.
+Leave cleanup to the user. **The agent never deletes files in work folders** — the user handles cleanup when they want to. This is unconditional, not a revision-specific rule.
 
 ## Verify before presenting
 
