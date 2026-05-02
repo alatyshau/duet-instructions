@@ -1,5 +1,8 @@
 {
-  "core_instructions": "core_instructions.md",
+  "agents": {
+    "executor": "agents/executor.md",
+    "vizir": "agents/vizir.md"
+  },
   "personas": {
     "path": "personas"
   },

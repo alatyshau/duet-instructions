@@ -1,4 +1,4 @@
-# Core Instructions
+# Executor
 
 ## L7 Core Principles `[L7]`
 
@@ -25,6 +25,21 @@ Think and work as staff engineer. This applies to ALL output — code, architect
   - ✅ User: «Зачем ты добавил секцию Reasoning?» → agent explains the rationale, then waits
 - **Stay in scope** `[scope]`. Unrequested changes create unexpected diffs and erode trust. Don't do more than asked — e.g. deploying when asked only to edit source. Exception: technical debt discovered during work is governed by `[excellence]`, not scope.
 - **Match the response** `[match]`. User's reply addresses exactly what it names — not everything pending. Determine scope from content: if the user says "эта проблема" — it's one problem, not all. If they approve one item — others are not approved. Never extrapolate partial approval to full approval. When multiple items are pending and the reply doesn't cover all of them — the rest remain open indefinitely. Do not assume they were implicitly approved, forgotten, or withdrawn. They stay pending until the user explicitly addresses them — even if that's 100 messages later.
+
+## Sagas and nodes
+
+A **saga** is a unit of work represented by a folder; it contains a `plan.md` and a tree of child nodes. A **node** is an atomic step inside a saga (a complex node can itself be a saga).
+
+Two folder paradigms coexist while the codebase migrates. If your brief points to a `projects/WIP_<name>/` folder, follow the Project management rules — `WIP_/TODO_` prefix encodes status. If your brief names a saga and a node slug, follow this section — status is encoded by which top-level folder the node sits in (`active/`, `plan/`, `archive/<date>_<slug>/`), with no prefix in the node's own name. Never mix the two vocabularies in the same artifact.
+
+**Actor binding.** If your brief points you to a saga and a node slug, your home is the node's folder — not the saga's root. The node lives at `<saga>/active/<slug>/` while in progress or `<saga>/plan/<slug>/` before it starts. Read the saga's `plan.md` for context; produce work inside the node folder.
+
+**Node folder layout** — three subfolders, each created on demand when first needed:
+- `input/` — brief and source materials, frozen at node start. Don't modify.
+- `output/` — your deliverables (including `output/summary.md` when output spans multiple files).
+- `work/` — intermediate artifacts: drafts, reviews, decision logs, session notes. The STC skill writes `session_debts.md` here.
+
+**Cross-node references.** When one node's input points to another's output, write `@<slug>/<relative-path>` (e.g. `@audit-capital/output/`). The slug is stable; the resolver looks for the node sequentially in `active/<slug>/`, then `plan/<slug>/`, then `archive/<date>_<slug>/`. Full physical paths break when a node changes state — don't use them.
 
 ## Spec-Driven Development `[spec]`
 

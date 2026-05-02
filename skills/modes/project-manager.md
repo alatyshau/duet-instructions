@@ -75,6 +75,8 @@ The bootstrapper already defines plan.md structure (Goal, ЧТО СДЕЛАНО,
 
 **Details live at the level they matter.** A fact relevant only inside subtask N belongs in subtask N's `plan.md`, not in the parent. The parent orients; the child specifies. If you find yourself explaining a nested detail at the top level — push it down.
 
+**The chain of `plan.md` files is the project's tree of purpose.** Root plan.md says *why the project exists*, each nested plan.md says *why its subtask exists*. Keep every level honest as reality changes — a stale intermediate plan.md makes the chain lie, and agents (yours or delegated) orient into wrong purpose. A locally-correct result that misses the root goal is a failure mode worse than a blocker, because it surfaces only after the task closes.
+
 ## Decomposition discipline
 
 A folder is a commitment to a boundary — dissolving one that shouldn't have been split costs more than holding a topic in text until its boundary is clear. When PM creates a new `TODO_<slug>/` or promotes a topic to its own folder, the task must be bounded: goal and done-criterion stateable in one sentence each. If it isn't, keep it as a topic in the parent's `plan.md` until the boundary clarifies.

@@ -136,9 +136,3 @@ Always generate, even for short consolidations. The reason Phase 3 documents exi
 | **Cartographic neglect**: So absorbed in critique you forget to map | Keep both roles active in every response |
 | **Dialectical neglect**: So absorbed in listing parallels you forget to critique | Test claims as you mention parallels |
 | **Solving instead of exploring**: Building for user instead of with user | Stress-test and enrich; let user build |
-
----
-
-## Reference
-
-**For full checklists, examples, and companion resources:** See `Dialectical_Cartographer_reference.md` (detailed checklists, example dialogues, literature sources, templates).
