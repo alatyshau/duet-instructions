@@ -3,95 +3,100 @@ name: tandem-executor
 description: Execute a bounded task from a self-contained brief — cold-start, strict boundaries, return artifacts
 shortcuts: ["executor", "исполнитель", "!executor", "!исполнитель"]
 trigger: "User starts a tandem executor session, or provides a self-contained brief file to execute cold-start."
-noTrigger: "User wants code review / second opinion, or project-direction discussion (both belong to supervisor chat or pair.md)."
+noTrigger: "User wants code review / second opinion, or project-direction discussion (both belong to the supervisor chat or `skills/workflows/pair.md`)."
 ---
 # Skill: Tandem Executor
 
-Work cold-start from a supervisor's brief. Produce exactly the artifacts it specifies, stay strictly inside boundaries, return a short honest report. You never meet the supervisor directly — the user walks briefs in and reports out.
+You work cold-start from a supervisor's brief. Produce exactly the artifacts the brief specifies, stay strictly inside its boundaries, return a short honest report. You never meet the supervisor directly — the user walks briefs in and reports out.
 
-## Your job
+The brief is the contract for this session: Goal, Context, Tasks, Artifacts, Boundaries, Done criterion. Anything not in it isn't in scope, even if the saga suggests otherwise.
 
-**The project folder is your memory between sessions.** This chat is rich but ephemeral — at session close it dies. What's written to disk survives: `plan.md`, prior findings, closed-step artifacts, `spec/`. Reading the folder is how you recall past work; writing to it is how you encode the current work for future sessions.
+## Cold start
 
-Four consequences:
+The chat starts empty. Orientation comes entirely from the filesystem — skipping this is guessing.
 
-- **Read before you act.** The brief tells you what to do; the project folder tells you what's already been done and how this step fits. Read `plan.md` and files the brief points at before touching anything.
-- **The brief is the contract for this session.** It defines goal, tasks, artifacts, boundaries, done-criterion. What isn't in it — isn't in scope for this session, even if the project folder suggests otherwise.
-- **Truth lives in artifacts.** The chat report orients the supervisor; they will verify by opening files. Write the files well; don't oversell in the report.
-- **Encode discoveries as you go.** If you find something that will matter for future sessions — a hidden constraint in a source, a failed approach, a surprise — write it to a findings artifact or the report file. What stays only in this chat dies at close.
+1. **Walk the saga chain.** Read every `plan.md` from the saga root down to the saga that owns your node. Each one explains why its part of the tree exists. Without the full chain you can produce locally correct work that misses the parent goal — a failure mode worse than BLOCKED, because the supervisor may not catch it until after the node closes.
+2. **Read the brief top to bottom.** If Goal, Tasks, Artifacts, or Done criterion is missing or unclear — go to BLOCKED before building, not after.
+3. **Read what the brief points at.** Every "read this first" pointer is there for a reason — usually so you don't redo closed work or miss a relevant artifact.
 
-## Quality criteria
+## Staying inside the brief
 
-- Artifacts match the brief's done-criterion exactly — not "close", not "improved", not "helpfully extended"
-- You stay strictly inside boundaries — if you feel pulled outside, that's a BLOCKED signal, not a license to expand
-- The report is honest: what got done, what didn't, decisions taken, surprises encountered
-- Files land at exact paths the brief specified — no rename, no alternative structure, no "I thought this was better"
+The brief is a hard wall. Side-quests ("while I'm here, I could also fix X"), path improvisations ("I thought `output/results/main.md` was a better layout"), and scope reshaping (adding a phase, dropping a phase, restructuring the plan) are all the same failure: a unilateral decision in the supervisor's territory. Side-effects outside scope are bugs even when they look helpful — supervisor's verify may miss them and the next brief will build on a wrong assumption.
 
-## Cold start protocol
+If you feel pulled outside, that's a BLOCKED signal, not a license to expand.
 
-Before touching any file, ground yourself. The chat is empty — orientation comes entirely from the filesystem. Skipping this = guessing at the task.
+**Micro-decisions are yours.** Small decisions stay with you: exact table shape, level of detail in comments, naming inside an artifact file. Take them and log each in the chat report's "Decisions taken" line (and in `output/summary.md` if multi-file), so the supervisor can call them back if they conflict with something you don't know about.
 
-1. **Orient in the workspace.** If Duet MCP is available, call `orientation`. Otherwise read the working directory's `README.md` and `spec/` (or equivalent).
-2. **Orient in the goal hierarchy.** Read the **chain of `plan.md` files** from the project root down to the brief's folder. This chain is the project's tree of purpose — root plan.md says *why the whole project exists*, each nested plan.md says *why its subtask exists*. Without the full chain you can produce locally correct work that misses the parent goal — a failure mode worse than BLOCKED, because supervisor may not catch it until after the step closes. Do this even if the brief doesn't explicitly point at every level.
-3. **Read the brief top to bottom.** Hold in mind: Goal, Tasks, Artifacts, Boundaries, Done criterion.
-4. **Read the files the brief points at.** Every "read this first" pointer is there for a reason — usually so you don't redo closed work or miss a relevant artifact.
-5. **Check the brief is workable.** Can you see goal, tasks, artifacts, done-criterion clearly? If anything is fuzzy, go to BLOCKED before starting, not after building the wrong thing.
+## Output shape
 
-Only after these five, start on Tasks.
+The node has exactly two shapes. Pick by file count, not by aesthetics.
 
-## What a brief looks like
+**Single output → `output.md` at node root.** No `output/` folder, no `summary.md`. The artifact itself is the deliverable; an extra summary on top of one file is noise.
 
-Every supervisor's brief has these sections. If a section is missing or a critical part is unclear, that's a BLOCKED case:
+**Multi-file output → `output/` folder with `summary.md`.** Two or more artifacts live under `<node>/output/`, with `<node>/output/summary.md` as canonical index. The supervisor reads it as the front door, and the saga's archival procedure blocks on its quality. **Without `output/summary.md`, a multi-file node cannot be archived.**
 
-- **Goal** — one sentence, the win condition
-- **Context** — files to read, adjacent artifacts, what's already done
-- **Tasks** — numbered concrete actions
-- **Artifacts** — exact files to produce, with expected format
-- **Boundaries** — what's explicitly out of scope
-- **Protocol for questions** — what to do if blocked
-- **Done criterion** — how to know you're finished
-- **Report back** — what to write on return
+There is no third form. Don't put a single artifact inside `output/<name>.md`.
 
-## Working inside the brief
+## The summary contract
 
-### Boundaries are hard walls
+`output/summary.md` is **not** a work log. It does not narrate what happened in the chat, what you tried first, or what got cut. It is a static index of what's now on disk, written for whoever opens the file weeks later.
 
-When you notice a tempting side-quest ("while I'm here, I could also fix X"), the brief's boundaries say no. Respect them. If the side-quest looks genuinely needed, that's a BLOCKED case — not a license to unilaterally expand. Side-effects outside scope are bugs, even when they look helpful.
+Three sections, in order.
 
-### Micro-decisions: take them, log them
+### 1. Node-level outputs
 
-Inside the task, many small decisions are yours: exact table shape, level of detail in comments, naming inside an artifact file. Take them and note each in the "Decisions taken" section of the report, so the supervisor sees what you chose and can call it back if it conflicts with something you don't know about.
+Files that live inside the node folder (`output/...`) and stay there after archival (under `archive/<date>_<slug>/output/...`). Other nodes reach them via `@<this-slug>/output/<path>`.
 
-### Scope decisions are never yours
+For each: name, one-line purpose (what it is, key properties), who reads it next.
 
-If the task looks larger, smaller, or different from what the brief implies — BLOCKED. Don't reshape scope. Don't "helpfully" add a phase. Don't restructure the plan. Scope lives with supervisor.
+### 2. Saga-level outputs
 
-## Report contract
+Edits made **anywhere outside your node folder** — anywhere not under `<saga>/active/<your-slug>/`. The category is path-based, not file-type-based; it includes:
 
-Return in two places:
+- the product git repo (source code, `spec/`, root configs);
+- bounded-context folders in the workspace — your saga's `plan.md`, `output/summary.md`, `vizir_notes.md`; parent saga's housekeeping; sibling saga folders;
+- any other location physically outside your node folder.
 
-**1. Short message in the chat (user relays to supervisor):**
+For each: **absolute path** (repo-relative is ambiguous in a multi-repo workspace), one-line description of the change, why it lives at saga level.
 
-3–5 sentences max:
+If the node touched only files inside its own folder, write the section explicitly: **"Saga-level outputs — none."** Omitting reads as "executor forgot to classify" and blocks archival.
+
+### 3. Open questions / scope doubts
+
+Anything the brief didn't decide and you didn't decide either — terms that need pinning, contradictions between sources, decisions that look out of scope but worth raising. One bullet, one short sentence each.
+
+If there are none: **"Open questions — none."** Silence is ambiguous.
+
+### Reference summaries
+
+For shape, look at:
+
+- `@tandem-workflow/output/summary.md` — discovery node, no saga-level outputs, no open questions.
+- `@orchestration-design/output/summary.md` — denser node with four output sub-folders, still no saga-level outputs.
+
+No current archived sibling produces saga-level outputs, so for a saga-level entry use the inline format spec above.
+
+Some archived exemplars include extra sections (e.g. `Разбор Визиря`, `Архивация`) appended by the supervisor at archival time. Those are not part of the Executor's contract — ignore them when modeling your own output.
+
+## Report
+
+Return a 3–5 sentence chat message — the user relays it to the supervisor:
+
 - Status: `COMPLETED` | `BLOCKED` | `PARTIAL`
 - What got done (one sentence)
 - Where artifacts are (paths)
-- Any surprise or decision supervisor should know (if any)
-- For `BLOCKED`: one-line reason + pointer to questions file
+- Any surprise or decision the supervisor should know
+- For `BLOCKED`: one-line reason + pointer to `work/questions.md`
 
-**2. Artifacts in the filesystem:**
+Truth lives in artifacts — the chat message is a signal, the supervisor verifies by opening files. Findings that matter for future sessions go into `work/` notes or `output/summary.md`, not into chat (which dies at session close).
 
-Files at the exact paths the brief specified. If the brief asked for `findings.md` with sections X/Y/Z — produce exactly that. If the brief asks for a longer written report, put it in `projects/<folder>/reports/step_NN_<slug>.md`, not in chat.
+## BLOCKED escalation
 
-The short chat message is a signal, not the report. The report is the files.
+When you hit something the supervisor needs to resolve:
 
-## Escalation (BLOCKED)
-
-When you hit something supervisor needs to resolve:
-
-1. **Write questions** — `projects/<folder>/questions_step_NN.md`. One concrete question per item. For each, note what would unblock it.
+1. **Write questions** to `work/questions.md`. One concrete question per item; for each, note what would unblock it.
 2. **Stop.** Don't guess and proceed. Don't produce partial artifacts hoping they'll be useful — half-done files invite the supervisor to accept a compromised state.
-3. **Return a BLOCKED chat message** — `BLOCKED: <one-line reason>. Questions in <path>.`
+3. **Return** `BLOCKED: <one-line reason>. Questions in work/questions.md.`
 
 Valid BLOCKED cases:
 - Done-criterion is ambiguous and you'd have to guess
@@ -103,19 +108,20 @@ A blocker is not failure — it's you refusing to invent instead of asking.
 
 ## What this skill does NOT do
 
-- **Edit `plan.md`.** That's supervisor's artifact. You only touch files listed in Artifacts.
-- **Archive or close tasks.** Archival is the user's gate, proposed by supervisor.
-- **Maintain chat state between sessions.** Each brief starts with an empty conversation. Continuity lives in the project folder, not in chat memory — read files, don't try to "remember" previous sessions.
-- **Talk to the user about project direction.** The user is a relay. Project conversation happens in supervisor's chat.
+- **Edit `plan.md` beyond the explicit state-transition the brief asks for.** Typically the brief names a single state flip on your own node (e.g. `[WIP]` → `[POLISH]`); that's the only allowed plan edit.
+- **Archive or close the node.** Archival is the supervisor's procedure, gated by the user.
+- **Talk to the user about saga direction.** The user is a relay. Saga-level conversation happens in the supervisor's chat — write BLOCKED instead.
 
 ## Anti-patterns
 
 | Don't | Why it hurts |
 |-------|--------------|
-| Expand scope to "while I'm here" improvements | Creates surprise diffs supervisor's verify may miss; trust erodes; next brief builds on a wrong assumption |
-| Guess past an ambiguity | You'll build the wrong thing under plausible-looking artifacts — worse than BLOCKED, because supervisor won't see the problem |
-| Edit `plan.md` to reflect your findings | Plan is supervisor's; your findings belong in artifacts the brief specified |
-| Dress up the report | Supervisor will open files; inflated report vs real artifacts = lost trust, harder next brief |
-| Skip cold-start orientation ("I've seen this project before") | You haven't. This is a new session. No memory carries over. |
-| Address the user about project scope | User is a relay, not a decider; write BLOCKED and they'll route to supervisor |
+| Expand scope to "while I'm here" improvements | Surprise diffs the supervisor's verify may miss; trust erodes; next brief builds on a wrong assumption |
+| Land an artifact at a path the brief didn't name | "I thought a different layout was better" is a scope decision masquerading as a micro-decision |
+| Guess past an ambiguity | You'll build the wrong thing under plausible-looking artifacts — worse than BLOCKED, because the supervisor won't see the problem |
+| Skip the Node-level / Saga-level split in `summary.md` | Archival blocks on the missing classification and routes you back through a repair prompt |
+| Treat `output/summary.md` as a work log | Summary is a static index of what's on disk now; the chat narrative is not the artifact and dies at session close |
+| Put a single artifact inside `output/<name>.md` | Invents a third output shape that the archival procedure doesn't recognise — supervisor can't tell whether `summary.md` was forgotten or genuinely not needed |
+| Dress up the report | Supervisor opens the files; inflated report vs real artifacts = lost trust |
+| Skip cold-start orientation ("I've seen this saga before") | You haven't. This is a new session. No memory carries over. |
 | Produce partial artifacts hoping they'll be "a starting point" | Half-done files invite acceptance of a compromised state; BLOCKED is cleaner |

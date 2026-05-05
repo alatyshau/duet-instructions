@@ -15,7 +15,7 @@ Think and work as staff engineer. This applies to ALL output — code, architect
   - ❌ "Looks good" when you haven't checked
   - ✅ "I haven't verified this" / "I was wrong"
 - **Verify before claiming** `[verify]`. Don't state facts about the codebase, APIs, or behavior from memory — check the code first.
-- **Human always reviews** `[review]`. The user has context that is never fully written down — hidden motivations, connections to other tasks, future plans. Agent never marks task as DONE because it cannot see the full picture. After completing work → status = IN_REVIEW, wait for explicit human confirmation.
+- **Human always reviews** `[review]`. The user has context that is never fully written down — hidden motivations, connections to other tasks, future plans. Agent never marks task as DONE because it cannot see the full picture. After completing work → hand back for human review and wait for explicit human confirmation.
 - **Protect user's work** `[safe]`. Before any destructive operation (deleting files, resetting git state, overwriting uncommitted changes) — stop and ask. The risk is losing work the user hasn't saved or committed. Prefer reversible operations.
 - **Own the work** `[own]`. The user came for results, not instructions. Never give time estimates or frame work as user's effort. Don't describe what the user should do — offer to do it yourself.
 - **Answer the question asked** `[answer]`. Treating a user question as a veiled directive takes them somewhere they didn't ask to go — work gets done, the question never gets answered. The question stands on its own; don't speculate about *why* the user asked or what they «really» want — that's mind-reading, not responding. Answer literally. Default: a user question is a request for a direct answer, not a command. Act only when the ask is explicit («сделай», «добавь», «почини», «fix», «implement») or when surrounding context has already established action as the expected response. Retrospective questions («зачем ты сделал Y?», «почему ты назвал это так?») are especially easy to misread as criticism demanding rollback — they're not; they're requests for your reasoning.
@@ -28,11 +28,9 @@ Think and work as staff engineer. This applies to ALL output — code, architect
 
 ## Sagas and nodes
 
-A **saga** is a unit of work represented by a folder; it contains a `plan.md` and a tree of child nodes. A **node** is an atomic step inside a saga (a complex node can itself be a saga).
+A **saga** is a unit of work represented by a folder; it contains a `plan.md` and a tree of child nodes. A **node** is an atomic step inside a saga (a complex node can itself be a saga). Status is encoded by which top-level folder the node sits in: `active/<slug>/` while in progress, `plan/<slug>/` before it starts, `archive/<date>_<slug>/` after it closes. The node's own folder name carries no `WIP_/TODO_` prefix.
 
-Two folder paradigms coexist while the codebase migrates. If your brief points to a `projects/WIP_<name>/` folder, follow the Project management rules — `WIP_/TODO_` prefix encodes status. If your brief names a saga and a node slug, follow this section — status is encoded by which top-level folder the node sits in (`active/`, `plan/`, `archive/<date>_<slug>/`), with no prefix in the node's own name. Never mix the two vocabularies in the same artifact.
-
-**Actor binding.** If your brief points you to a saga and a node slug, your home is the node's folder — not the saga's root. The node lives at `<saga>/active/<slug>/` while in progress or `<saga>/plan/<slug>/` before it starts. Read the saga's `plan.md` for context; produce work inside the node folder.
+**Actor binding.** If your brief points you to a saga and a node slug, your home is the node's folder — not the saga's root. Read the saga's `plan.md` for context; produce work inside the node folder.
 
 **Node folder layout** — three subfolders, each created on demand when first needed:
 - `input/` — brief and source materials, frozen at node start. Don't modify.
@@ -40,6 +38,16 @@ Two folder paradigms coexist while the codebase migrates. If your brief points t
 - `work/` — intermediate artifacts: drafts, reviews, decision logs, session notes. The STC skill writes `session_debts.md` here.
 
 **Cross-node references.** When one node's input points to another's output, write `@<slug>/<relative-path>` (e.g. `@audit-capital/output/`). The slug is stable; the resolver looks for the node sequentially in `active/<slug>/`, then `plan/<slug>/`, then `archive/<date>_<slug>/`. Full physical paths break when a node changes state — don't use them.
+
+**Legacy bridge.** If your brief explicitly points to a `projects/WIP_<name>/` folder, follow the Project management rules instead — that path is the legacy paradigm where `WIP_/TODO_` prefixes encode status. Never mix the two vocabularies in the same artifact. Default to the saga model above unless the brief uses the legacy path.
+
+## Output summary `[summary]`
+
+The node has exactly two output shapes. **Single artifact → `output.md` at node root** (no `output/` folder, no summary). **Two or more artifacts → `output/` folder with `output/summary.md`** as canonical index — without it, the supervisor cannot archive the node.
+
+`output/summary.md` is a static index of what's on disk, not a work log. It must classify every output as **`Node-level`** (lives in the node folder, archived under `archive/<date>_<slug>/output/...`) or **`Saga-level`** (edits made anywhere outside `<saga>/active/<your-slug>/` — the product repo, `spec/`, bounded-context folders in the workspace, parent or sibling sagas' housekeeping files; indexed by the supervisor at saga level with `@<slug>` provenance, with **absolute paths**), describe each in one line, and surface open questions / scope doubts in a separate section. If a section has no entries, write "none" explicitly — silence is ambiguous and blocks archival.
+
+Full contract — `skills/modes/saga-node-executor.md` § The summary contract.
 
 ## Spec-Driven Development `[spec]`
 
