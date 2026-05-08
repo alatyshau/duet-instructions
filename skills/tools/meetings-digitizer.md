@@ -19,7 +19,7 @@ shortcuts: ["оцифруй встречу"]
 ## Константы
 
 ```
-SCRIPTOR_ROOT = <определить через workspace_info: найти stream "ТехноЛаб" → product "Scriptor" → main_folder>
+SCRIPTOR_ROOT = <определить через orientation: найти context "Scriptor" в chain (контекст с git_url) → его main_folder>
 GEM_INSTRUCTION = SCRIPTOR_ROOT/MeetingsDigitizer/gem_instruction.md
 MEDIA_DIR = <директория входного медиафайла>
 OUTPUT_DIR = MEDIA_DIR/{name}/

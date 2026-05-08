@@ -20,7 +20,7 @@ shortcuts: ["!транскрибируй"]
 ## Константы
 
 ```
-SCRIPTOR_ROOT = <определить через workspace_info: найти stream "ТехноЛаб" → product "Scriptor" → main_folder>
+SCRIPTOR_ROOT = <определить через orientation: найти context "Scriptor" в chain (контекст с git_url) → его main_folder>
 GLOSSARIES_DIR = SCRIPTOR_ROOT/glossaries
 PROMPTS_DIR = SCRIPTOR_ROOT/prompts
 GEMINI_PROMPTS_DIR = SCRIPTOR_ROOT/src/scriptor/prompts

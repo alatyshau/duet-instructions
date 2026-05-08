@@ -223,21 +223,20 @@ A single issue may take one message or fifty — don't move on until resolved or
 ## [1/3] Glossary in system prompt — needed or redundant?
 
 **Problem.** `core_instructions.md` (системный промпт, всегда в контексте
-агента) содержит 25-строчный блок «Glossary»: дерево Entity Hierarchy
-(Business → Stream → Product...) и таблицу синонимов EN/RU («бизнес»=business,
-«дело»=stream и т.д.). Параллельно агент получает `context.chain` из
+агента) содержит 25-строчный блок «Glossary»: дерево иерархии сущностей
+и таблицу синонимов EN/RU. Параллельно агент получает `context.chain` из
 `workspace_info` — breadcrumb вида «МетаЛаб / ТехноЛаб / Duet» с типом на
 каждом уровне. Вопрос: даёт ли Glossary что-то сверх того, что уже приходит
 в `context.chain`, или дублирует?
 
 **Solution.** Оставить в `core_instructions.md` только таблицу синонимов
-EN/RU, дерево Entity Hierarchy удалить. После правки блок занимает 10 строк
+EN/RU, дерево иерархии удалить. После правки блок занимает 10 строк
 вместо 25 и содержит только то, чего нет в `context.chain` — русские
 синонимы для англоязычных терминов. Дублирование снимается, уникальное
 знание остаётся.
 
 Действия:
-- Удалить строки 39-53 (дерево Entity Hierarchy) из core_instructions.md.
+- Удалить строки 39-53 (дерево иерархии) из core_instructions.md.
 - Оставить таблицу EN/RU (строки 55-64).
 
 **Why.** *Альтернативы и почему они проигрывают (Q4).* Рассматривались

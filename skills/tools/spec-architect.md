@@ -21,8 +21,8 @@ Spec exists when:
 
 | Type | Example |
 |------|---------|
-| Glossary | "stream" = intermediate container, can nest |
-| Business rules | Name globally unique, priority: business > stream > product |
+| Glossary | "context" = bounded context, may nest; `meta` flag for system-level |
+| Business rules | Name globally unique across all contexts; conflict-resolver appends `(1)` to second match |
 | Boundaries | core/ never imports vscode |
 
 ### Not in Code (decisions, rationale, future)
@@ -68,8 +68,7 @@ Primary spec per entity type:
 |--------|-------------|---------|
 | product | `spec/PRODUCT.md` | Cross-component contracts, shared model |
 | component | `spec/COMPONENT.md` | Architecture + domain (merged) |
-| stream | `spec/STREAM.md` | Stream purpose, structure |
-| business | `spec/BUSINESS.md` | Business purpose, structure |
+| context | `spec/CONTEXT.md` | Context purpose, structure (when needed) |
 | project | `spec/PROJECT.md` | Project goals, decisions |
 
 Optional companion files (component only):
@@ -81,9 +80,9 @@ spec/
 └── UI.md           — view purposes, behavioral contracts (when relevant)
 ```
 
-**COMPONENT.md is the merged replacement** for the former DOMAIN.md + ARCHITECTURE.md split. First sentence becomes `description` in workspace_info response.
+**COMPONENT.md is the merged replacement** for the former DOMAIN.md + ARCHITECTURE.md split. First sentence becomes `description` in the `orientation` response.
 
-**Fallback chain:** workspace_info searches for spec file in order: primary file > COMPONENT.md > ARCHITECTURE.md > README.md > INDEX.md. First found wins.
+**Fallback chain:** `orientation` searches for the spec file in order: primary file > COMPONENT.md > ARCHITECTURE.md > README.md > INDEX.md. First found wins.
 
 ## Anti-patterns
 

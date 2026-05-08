@@ -17,7 +17,7 @@ Two modes:
 
 Before writing — ask: who reads/calls this and what do they need to do? Every sentence/field/endpoint either helps the consumer accomplish their task, or it's noise.
 
-**Case:** Designing topology field for orientation API response. Consumer — AI agent starting a session. Wrote: "root_business_folder is the business folder with root=true in business.json — a peer to other businesses, not their parent." This is correct architecture documentation. But the agent doesn't work with business.json, doesn't make architectural decisions about Duet, doesn't think about parent/peer relations. It needs: "default folder for paths, starting points for navigation, here's where data lives — go work."
+**Case:** Designing topology field for orientation API response. Consumer — AI agent starting a session. Wrote: "meta_context_folder is the context folder with meta=true in its manifest — a peer to other root contexts, not their parent." This is correct architecture documentation. But the agent doesn't work with manifests, doesn't make architectural decisions about Duet, doesn't think about parent/peer relations. It needs: "default folder for paths, starting points for navigation, here's where data lives — go work."
 
 Wrote **what it is** instead of **what to do with it**. Described the system instead of guiding the consumer.
 
@@ -25,9 +25,9 @@ Wrote **what it is** instead of **what to do with it**. Described the system ins
 
 When asked to change an artifact — first ask: what exactly is the problem? Classify each element: part of the problem, or working fine? Change only what's broken.
 
-**Case:** User asked to remove technical details from root_business topology ("root=true in business.json", "peer to other businesses"). Removed everything — including "Root business — multi-root workspace for cross-business work" which perfectly captured the purpose in one line. User returned it.
+**Case:** User asked to remove technical details from meta-context topology ("meta=true in manifest", "peer to other root contexts"). Removed everything — including "Meta-context — multi-root workspace covering everything" which perfectly captured the purpose in one line. User returned it.
 
-The request was to remove **implementation details**. "Multi-root workspace for cross-business work" is not an implementation detail — it's the purpose. Applied the operation mechanically without understanding why the change was requested. Didn't distinguish load-bearing (purpose) from decorative (implementation).
+The request was to remove **implementation details**. "Multi-root workspace covering everything" is not an implementation detail — it's the purpose. Applied the operation mechanically without understanding why the change was requested. Didn't distinguish load-bearing (purpose) from decorative (implementation).
 
 ### 3. Solutions must be actionable — two checks
 
@@ -39,7 +39,7 @@ A proposed solution must pass two checks:
 
 **Case:** Discovered that entity/reference_repo name collisions aren't validated. Proposed: "warning at scan time." User: "not operationalizable." Who reads scanner logs? Nobody. A collision would silently tick until something breaks.
 
-Then proposed: "let's surface through Host UI." But didn't know the current Host UI design. Instead of investigating, offered abstract "we'll note it as a requirement." User insisted — we dug into host_ui.md, found the wizard, discovered there's no suitable page. Result: a new "Business Folders" step in the wizard — config panel for business folders (moved from Extension) + error table below with description, advice, and Fix button for each collision.
+Then proposed: "let's surface through Host UI." But didn't know the current Host UI design. Instead of investigating, offered abstract "we'll note it as a requirement." User insisted — we dug into host_ui.md, found the wizard, discovered there's no suitable page. Result: a new root-context-folders step in the wizard — config panel for root context folders (moved from Extension) + error table below with description, advice, and Fix button for each collision.
 
 The path was: "warning in log" (non-operationalizable) → "surface in Host" (without checking availability) → "note as requirement" (deferral) → actually investigate Host UI → find concrete place → design concrete solution. Should have gone straight from problem to investigation.
 
