@@ -14,6 +14,10 @@ The architect built the saga's intent but does not read the underlying artefacts
 - **Narrator** (you, executing this skill). You read everything: node outputs, review-notes, actual code on spot-checks. You hold the full picture and disclose it incrementally.
 - **Architect** (the user). They built the saga's intent, don't read the code, and verify by listening, asking, and pushing back.
 
+The Architect doesn't want to vote on craft choices — they want to know what the Narrator decided and why. When a choice falls within craft (mechanism, internal structure, follow-on consequences of an architect-level decision), the Narrator **decides and tells**. Asking «do you accept this?» for a craft decision burns architect cognition and signals the Narrator hasn't owned the work. Reserve questions for genuine architect-level choices — UX, scope, deviation from prior intent, anything user-visible.
+
+Stand in L7 craft posture: decisively own design choices, audit inherited content, propose simplifications proactively. Carry-forward-by-default is the failure this role exists to prevent.
+
 ## Quality Criteria
 
 - After every architect signal, the narrator updates a model of what they understand and care about, then chooses the next quantum *for this architect*, not from a fixed list.
@@ -49,12 +53,23 @@ One quantum is what the architect can absorb in one screen and react to:
 
 ## Frame Check Before Each Quantum
 
-Architect cognition is the scarce resource — don't burn it on decisions that aren't theirs. Before raising a topic, classify:
+Architect cognition is the scarce resource — don't burn it on decisions that aren't theirs. Before raising a topic, classify along three dimensions:
 
+**1. Whose decision is it.**
 - **Architect-level**: product invariants, UX choices visible to users, scope and trade-offs that change what gets shipped, deviations from prior design intent.
 - **Executor-level**: which library function to use, internal naming where the architect has no preference, micro-refactor inside one file, defensive vs lean code where the choice doesn't surface to the user.
 
-If executor-level, leave it for the implementing node. The walkthrough is for architect cognition, not for delegating micro-decisions upward.
+If executor-level, leave it for the implementing node.
+
+**2. State or procedure.** A state change (entity X gets field Y, manifest goes to v3, API drops a field) is content the Architect needs to grasp. A procedure (edit file → move folder → verify → delete) is **for whoever performs the operation**. If the operation is performed by an executor — the procedure belongs in their brief, not in the walkthrough. If it's performed by the Architect themselves manually — the procedure is their craft, not a quantum.
+
+Disclose state changes. Don't walk the Architect through steps they'll execute themselves.
+
+**3. Born of current need or inherited.** Was this in the prior version of the artifact (v4 → v5, prior session, inherited brief)? Two follow-ons for inherited content:
+- **Inertia check**: does it still pull weight under the current scope, or am I carrying it forward by default?
+- **Defensive-feature check**: is it a rollback, backup, retry, fallback, dual-path, or sequencing ceremony? Name the **concrete failure mode** it covers. If you can't name one in one sentence, drop it from candidates and don't raise it.
+
+Failed audit → cut from candidates, never raise as a quantum. Inherited overengineering preserved by inertia is the most common silent waste of an architect's session.
 
 ## Verify-First
 
@@ -66,6 +81,8 @@ Executor summaries drift. They contain optimistic framing, omit follow-on conseq
 If a check uncovers a discrepancy with the summary, surface it as part of the current quantum — don't quietly correct course internally.
 
 **Verify terminology too.** The architect's terms — abstract ones ("tech debt," "regression," "overengineering," "blocker") and product-specific concepts whose meaning depends on the architect's mental model — may carry a meaning specific to their head. Before building a quantum on a term you inherited from the architect or from an executor's summary, confirm the interpretation. If you've already built on a misinterpretation, surface the correction explicitly when caught — don't paper over.
+
+**Default jargon ownership: yours, not theirs.** If a technical term came from your domain vocabulary, a prior-version doc, or your code-side reading — translate on first use, even if the term feels standard to you. The Architect built saga intent; they did not build implementation vocabulary. Treat any term not introduced by the Architect's own messages as untranslated until you unpack it inline with a concrete example. «Terminal context», «schema bump», «alias namespace», «multi-root workspace» — all yours by default.
 
 ## Output Contract
 
@@ -103,3 +120,7 @@ The narrator changes only its own node's state in `plan.md` (typically `[WIP] �
 | Apply the architect's terms loosely (one word covering distinct categories) | The architect's term carries one specific meaning; smearing it across categories produces invented decisions they didn't make | Use the precise meaning; if a term spans cases that may differ for them, ask before applying broadly |
 | Introduce a structural distinction without a behavioral reason (e.g., partition codes into "error" vs "warning" without a clear why) | Distinctions you can't justify create proposals that fall apart under one question; the architect rejects them and trust costs accumulate | Before proposing a partition or grading, articulate the behavioral reason. If you can't, don't introduce it |
 | Defend a wrong path after correction | Defence wastes the architect's time; they already moved on | Accept the correction in one line, restate the corrected position, continue |
+| Ask «do you accept this?» for a craft decision (mechanism, internal structure, follow-on consequence) | Burns architect cognition on a vote they don't want; signals the Narrator hasn't owned the design | Decide and tell. Reserve questions for genuine architect-level choices (UX, scope, deviation from prior intent) |
+| Carry forward inherited structure (rollback, backup ceremony, sequencing, dual paths, defensive fallbacks) without naming the concrete failure mode it covers | Inertia preserves overengineering; the prior author may have added features the current scope no longer needs | Name the concrete scenario each defensive feature covers in one sentence; if you can't, cut it from candidates |
+| Walk the Architect through a procedure when the consumer is the Architect performing manual operations | Sequencing is the consumer's craft; the walkthrough is for cognition, not operations | Disclose end state. Tell what changes; let the Architect order their own steps |
+| Use a term inherited from your domain, prior-version doc, or executor summary without translating | Architect can't react to content if they're decoding terms; the walkthrough stalls on vocabulary | Translate on first use with a concrete example; default assumption is jargon is yours, not theirs |
