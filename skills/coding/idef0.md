@@ -7,334 +7,197 @@ noTrigger: "Do not use for general process analysis or classical IDEF0 theory un
 ---
 # Skill: IDEF0
 
-Create valid IDEF0 models in the IDEFy `.idef0` DSL, including file layout, activity decomposition, arrow notation, tunnels, and canonical formatting.
+Write valid `.idef0` files in the IDEFy DSL — one file per decomposition sheet, with correct arrow roles, interface contracts between levels, and project layout under `src/idef0/`.
 
 ## Quality Criteria
 
-- The generated model is compiler-oriented: paths, filenames, IDs, interfaces, tunnels, and declarations are internally consistent.
-- The generated model is readable as IDEF0: every file describes one activity sheet, with clear boundary arrows and functional blocks.
-- Complex models are split into a project tree under `src/idef0/`, not squeezed into one oversized file.
-- Formatting follows the canonical style so a formatter or human reviewer can preserve the same structure.
-- The output is self-contained: if files cannot be written directly, provide the target tree and complete file contents.
+- Arrow roles match IDEF0 semantics: `I/O` are material/information that flows through and changes, `C` governs the activity without being consumed, `M` performs the activity.
+- Decomposition mirrors the file tree: one `.idef0` file per decomposed activity, atomic activities stay as blocks inside the parent.
+- Interface contract between parent and child is exact: the child file's boundary arrows match the IDs and meanings of what the parent consumes and produces for that block.
+- Output is a complete, self-contained file tree ready to drop into `src/idef0/`, with no `;` terminators, no comments inside declarations, and no text after the closing `}`.
 
-## When Generating
+## Arrow Roles: I / C / M / O
 
-Start from the activity being decomposed. One `.idef0` file describes one decomposition sheet:
+LLMs routinely confuse `C` (Control) with `M` (Mechanism), and `I` (Input) with `C`. Lead with contrasts:
+
+| `C` (Control) | `M` (Mechanism) |
+|---|---|
+| Recipe | Barista |
+| Building code | Inspector |
+| Pricing policy | Sales representative |
+| Compliance checklist | Compliance officer |
+| SLA agreement | Engineer on call |
+
+| `I` (Input, gets transformed) | `C` (Control, governs but unchanged) |
+|---|---|
+| Customer request | SLA agreement |
+| Roasted beans | Brewing recipe |
+| Raw log file | Parsing schema |
+
+**Definitions:**
+
+- `I` — material or information **consumed and transformed** into outputs. It physically/logically changes during the activity.
+- `O` — material or information **produced** by the activity.
+- `C` — rules, standards, policies, recipes — **what shapes the activity** but is not consumed. After the activity runs, the control is still there, unchanged.
+- `M` — resources that **perform** the activity: people, roles, tools, software, equipment. Mechanisms execute, controls direct.
+
+**Test for `C` vs `M`:** if the arrow is a *person, role, tool, or running system*, it's `M`. If it's a *document, rule, standard, or specification*, it's `C`. A spec written by a person is still `C`; the person who wrote it is `M` of the authoring activity, not this one.
+
+**Test for `I` vs `C`:** if the activity changes the thing or consumes it, it's `I`. If it only reads or follows it, it's `C`.
+
+## Naming Activities
+
+- Verb-led: `"Brew coffee"`, not `"Coffee"`. `"Process onboarding request"`, not `"Onboarding"`. (Language follows the user — Russian, English, any — only the verb-form discipline is universal.)
+- Name the transformation: the title should make the I→O delta visible.
+- Keep it short and in the domain language the user already uses elsewhere in the project.
+
+## When to Decompose
+
+Decompose a block (give it its own `Aₓ.idef0` file) when:
+
+- The block contains more than ~5 sub-steps you could enumerate, **or**
+- The block is handed off to a different actor (different `M`), **or**
+- The block runs on a different rhythm or boundary (real-time vs batch, sync vs async).
+
+Otherwise keep it atomic — no file, just a row in the parent's decomposition section.
+
+## Writing Declarations
+
+The DSL has no `;` and no separator between declarations. Each declaration starts on its own line with a prefix that identifies it:
+
+- In an `activity` body: `I*` / `O*` / `C*` / `M*` (boundary arrows), then `A*` (functional blocks).
+- In a `context A-0` body: `T*` (tunnel) or `...A0` (root reference).
+
+**Boundary section first, then decomposition.** Inside `activity`, write all boundary arrows (`I/O/C/M`), then a blank line, then all functional blocks (`A*`). Never put a boundary arrow after the first `A*` line.
+
+**Continuations.** If a functional block doesn't fit on one line, break after `:`, `->`, or `,` and indent continuations one tab deeper:
 
 ```idef0
-activity A0 "Activity name" {
-    I1 "Input";
-    O1 "Output";
-    C1 "Control";
-    M1 "Mechanism";
-
-    A1 "Functional block" : I1, C1, M1 -> X11[O1];
-}
+    A1 "Analyze project"
+        : I1, C1
+        ->
+            X11 "Process name",
+            X12 "Inputs",
+            X13 "Outputs"
 ```
 
-For a project, create at least two files in the same project root:
+**Comments.** Use `# ...` only between declarations or at the file top. Never inside a declaration body — a `#` line cuts the current declaration off.
+
+**Text after `}`.** Don't write any. The file ends at the closing `}` of the header.
+
+**String literals.** Double quotes only. Escape inner `"` as `\"`. Single quotes are regular characters.
+
+## Activity and Block IDs
+
+- Root activity of every model is always `A0`.
+- Child blocks: `A1`, `A2`, …, `A9`, `AA`, `AB`, …, `AZ`. Suffix alphabet is `[1-9A-Z]+` — uppercase letters and digits 1–9 only. `0` is reserved for the root: `A10`, `A20`, `A1Z0` are invalid.
+- Grandchildren concatenate: `A11`, `A1A`, `A1Z`, `A11A`, …
+- Up to 9 blocks per activity is the IDEF0 norm. 10–35 is allowed but a sign the activity is wrong-grained. More than 35 per activity is invalid — if you need that many, the activity is wrong-grained and must be split first.
+- Separate models never use `B0`, `C0`. Create sibling projects, each with its own `A0`.
+
+A block gets its own `.idef0` file **only if it's decomposed** (see *When to Decompose*).
+
+## Functional Block Syntax
+
+```idef0
+A1 "Block name" : <consumed arrows> -> <produced arrows>
+```
+
+**Consumed (left of `->`):**
+
+- Parent boundary `I*`/`C*`/`M*` consumed by bare ID: `I1`, `C1`, `M1`.
+- Internal arrows from sibling blocks and tunnels require an explicit role prefix: `I[X11]`, `C[X11]`, `M[X11]`, `I[T1]`, `C[T1]`, `M[T1]`. The same `X` or `T` arrow can play different roles for different consumers, so the role must be stated.
+- Never consume `O*`. Outputs leave the sheet, they don't enter blocks.
+
+**Produced (right of `->`):**
+
+- `X11 "Description"` — a new internal arrow on this sheet.
+- `X11[O1]` — internal arrow mapped to parent output `O1`. Name and description come from `O1`.
+- `X11[T1]` — internal arrow tunnelled out through project tunnel `T1`.
+
+Always use `X*` on the produced side, even if no block consumes it yet. Producing `O*` or `T*` directly is invalid.
+
+## Tunnels
+
+Tunnels (`T*`) carry context that crosses sheets without becoming a parent output — typically external constraints (regulations, ambient state, environmental flows).
+
+- Declare each tunnel exactly once in `A-0.*.idef0`.
+- Every declared tunnel must be used somewhere in the project (as `X*[T*]` produced or `I/C/M[T*]` consumed).
+- On a single sheet, a tunnel cannot be both produced and consumed. Same-sheet flow is an internal `X*`, not a tunnel.
+- On the same sheet, a tunnel can be consumed by several blocks in different roles.
+- Across sheets, a tunnel can play different roles. The role is not fixed at declaration time.
+
+## Interface Consistency Between Levels
+
+When block `A1` in parent `A0` has its own file `A1.*.idef0`, the child header's boundary arrows must match what the parent declares for `A1`:
+
+- Every `I*`/`C*`/`M*` the parent feeds `A1` appears as a boundary arrow of the same ID in the child.
+- Every parent output `A1` reaches via `X*[O*]` appears as an `O*` boundary arrow in the child.
+- The child's internal `X*` namespace is independent of the parent's.
+
+Before writing a child file, copy the parent's declaration of the block and derive the boundary from it. Don't invent.
+
+## Project Layout
+
+A project is a connected subtree under `src/idef0/`. Its root folder contains `A0.*.idef0` (the marker) and `A-0.*.idef0` (the context).
 
 ```text
 src/idef0/<domain>/<model>/
     A-0.idef0
     A0.idef0
+    A1.idef0          # only if A1 is decomposed
+    A11.idef0         # only if A11 is decomposed
+    ...
 ```
 
-`A-0` is the project context, not an activity:
+**Path rules from `src/idef0/` to the project root:**
 
-```idef0
-context A-0 "Usage context" {
-    T1 "Tunnel used somewhere in the project";
+- At least one folder between `src/idef0/` and the project root. `src/idef0/A0.idef0` is invalid.
+- Folder names on this path are Java-package style: `[a-z][a-z0-9_]*`. No dots, hyphens, uppercase, or non-ASCII.
+- Project name is computed from this path with `/` → `.`: `src/idef0/coffee/brewing/` → `coffee.brewing`.
 
-    ...A0;
-}
-```
+**Inside the project root:**
 
-Use `A-0` only for tunnel declarations and the optional `...A0` reference. Do not decompose `A-0`.
+- Subfolders are free — for human navigation only. Flat, decomposition-mirroring, or business-phase layouts all work.
+- Folder names inside the project root can use any characters allowed in file names (including dots after the ID, like `A1.Accept/`).
+- No nested second `A0.*.idef0` anywhere in the subtree — projects don't nest.
+- Sibling models (AS-IS / TO-BE) live in sibling project folders, each with its own `A-0` and `A0`. Never `B0`, `C0`.
 
-## Project Roots and Paths
-
-The DSL is anchored by a `src/idef0/` scan root. That scan root may appear at any level of a repository or workspace:
-
-```text
-src/idef0/coffee/brewing/A0.idef0
-packages/samples/src/idef0/coffee/brewing/A0.idef0
-```
-
-Both are valid. The prefix before `src/idef0/` is not part of the project name.
-
-Project names are computed from the path after the nearest `src/idef0/` scan root and before the project root:
-
-```text
-src/idef0/coffee/brewing/A0.idef0
-# project name: coffee.brewing
-
-packages/samples/src/idef0/banking/lending/as_is/A0.idef0
-# project name: banking.lending.as_is
-```
-
-Rules:
-
-- Every `.idef0` file must live under a `src/idef0/` scan root.
-- There must be at least one folder between `src/idef0/` and the project root. `src/idef0/A0.idef0` is invalid.
-- Folder names on the path from `src/idef0/` to the project root must be Java-package style:
-  - first character: lowercase ASCII letter `a..z`;
-  - later characters: lowercase ASCII letters, digits, or `_`;
-  - no dots, hyphens, spaces, uppercase letters, or non-ASCII letters.
-- The project root is the folder containing `A0.*.idef0`.
-- The project root must also contain `A-0.*.idef0`.
-- Do not place a second `A0.*.idef0` anywhere inside an existing project root; nested projects are invalid.
-- Multiple models in one business area are sibling projects, each with its own `A-0` and `A0`.
-
-## File and Folder Names
-
-File format:
+## File Names
 
 ```text
 <ID>[.<cosmetic>].idef0
 ```
 
-Examples:
+- ID before the first dot must equal the `activity` or `context` ID inside the file.
+- Cosmetic text after the first dot is optional, for human navigation. May contain letters of any alphabet, digits, `_`, `-`. No spaces, dots, slashes, or quotes.
 
-```text
-A0.idef0
-A0.Order_intake.idef0
-A11.Validate-request.idef0
-```
+Examples: `A0.idef0`, `A0.Order_intake.idef0`, `A11.Validate-request.idef0`, `A1.Onboarding.idef0`.
 
-Rules:
+## Canonical Layout
 
-- The ID before the first dot must match the header ID inside the file.
-- Cosmetic text is optional and ignored by the compiler.
-- Cosmetic text may contain letters from any alphabet, digits, `_`, and `-`.
-- Cosmetic text must not contain spaces, dots, slashes, or quotes.
-- Cosmetic names for folders are allowed only inside the project root, for example `A1.Accept/`; folder names inside the project do not affect compilation.
-
-## Activity and Block IDs
-
-- The root activity of every model is always `A0`.
-- Child blocks use suffixes `1..9`, then `A..Z`: `A1`, `A2`, ..., `A9`, `AA`, `AB`, ..., `AZ`.
-- Deeper blocks concatenate suffixes: `A11`, `A12`, `A1A`, `A1B`, ...
-- Use uppercase Latin letters only in activity IDs.
-- Prefer no more than 9 functional blocks in one activity. 10..35 blocks are allowed but should be treated as a warning-level smell. More than 36 blocks is invalid.
-- Separate models never use `B0`, `C0`, etc.; create sibling projects with their own `A0`.
-
-Only create a separate `.idef0` file for a functional block when that block is decomposed. Atomic activities exist only as blocks in the parent file.
-
-## Arrow IDs and Roles
-
-Arrow ID prefixes define arrow type:
-
-| Prefix | Meaning |
-|---|---|
-| `I*` | Input boundary arrow |
-| `O*` | Output boundary arrow |
-| `C*` | Control boundary arrow |
-| `M*` | Mechanism boundary arrow |
-| `X*` | Internal arrow on one activity sheet |
-| `T*` | Tunnel declared in `A-0` |
-
-Boundary arrows are declared in the activity header, one per line:
+Inside `activity` and `context` bodies, one declaration per line. For functional blocks, when several short blocks sit next to each other, align `:` and `->` into columns and group consumed arrows by role (`I` → `C` → `M`) so the sheet reads like a small table:
 
 ```idef0
 activity A0 "Brew coffee" {
-    I1 "Roasted coffee beans";
-    O1 "Cup of coffee";
-    C1 "Recipe";
-    M1 "Barista";
+    I1 "Roasted coffee beans"
+    I2 "Filtered water"
+    O1 "Cup of coffee"
+    O2 "Spent grounds"
+    C1 "Recipe"
+    C2 "Target TDS"
+    M1 "Barista"
+    M2 "Grinder"
+    M3 "Temperature-controlled kettle"
+    M4 "Dripper and filter"
 
-    A1 "Grind beans" : I1, C1, M1 -> X11 "Ground coffee";
+    A1 "Grind beans"    : I1,     C1,     M1, M2 -> X11 "Ground coffee", X12[T1]
+    A2 "Prepare water"  : I2,     C1,     M3     -> X21 "Water at target temperature"
+    A3 "Extract coffee" : I[X11], C1, C2, M1, M4 -> X31[O1], X32[O2]
 }
 ```
 
-Every declaration ends with `;`. Use double-quoted strings. Escape inner double quotes as `\"`.
-
-## Functional Blocks
-
-Each functional block is one logical declaration:
-
-```idef0
-A1 "Block name" : <consumed arrows> -> <produced arrows>;
-```
-
-Consumed arrows on the left of `->`:
-
-- Parent boundary inputs, controls, and mechanisms are consumed by bare ID: `I1`, `C1`, `M1`.
-- Internal arrows and tunnels must declare the role they play for this block:
-  - `I[X11]`, `C[X11]`, `M[X11]`
-  - `I[T1]`, `C[T1]`, `M[T1]`
-- Do not consume `O*` directly. A parent output is reached by producing an internal `X*` mapped to `O*`.
-
-Produced arrows on the right of `->` always use an `X*` ID:
-
-- `X11 "Description"` creates an internal arrow on this sheet.
-- `X11[O1]` maps the internal arrow to parent output `O1`; name and description come from `O1`.
-- `X11[T1]` tunnels the internal arrow through project tunnel `T1`.
-
-Always produce an `X*` arrow, even if no block consumes it yet. This keeps later refactoring local.
-
-## Interface Consistency Between Levels
-
-When block `A1` in parent activity `A0` is decomposed into `A1.*.idef0`, the child file header must match the parent block interface:
-
-- Inputs consumed by `A1` become `I*` boundary arrows in the child file.
-- Controls consumed by `A1` become `C*` boundary arrows in the child file.
-- Mechanisms consumed by `A1` become `M*` boundary arrows in the child file.
-- Parent outputs produced by `A1` through `X*[O*]` become `O*` boundary arrows in the child file.
-- The child file has its own internal `X*` namespace.
-
-Before writing a child file, derive its boundary arrows from the parent declaration and check that the IDs and meanings agree.
-
-## Tunnels
-
-- Declare every tunnel exactly once in `A-0`.
-- Every declared tunnel must be used somewhere in the project.
-- On one activity sheet, the same tunnel cannot be both produced and consumed; use an internal `X*` arrow for same-sheet flow.
-- A tunnel may be consumed by multiple blocks on the same sheet, potentially in different roles.
-- A tunnel may play different roles on different sheets.
-- The role is not fixed in the `A-0` declaration.
-
-## Canonical Formatting
-
-Boundary arrows:
-
-- One arrow declaration per line.
-- Exactly one blank line between boundary arrows and functional blocks.
-
-Functional blocks:
-
-- Sort blocks by ID inside each activity.
-- Sort consumed arrows by role: inputs first, then controls, then mechanisms.
-- Sort arrows inside each role. Bare IDs come before bracketed references:
-  `I1, I2, I[T1], I[X11], I[X22]`.
-- Never split an activity ID, arrow ID, or string literal across lines.
-
-### Mode 1: One Line
-
-Use for short declarations. Adjacent Mode 1 blocks have no blank lines between them.
-
-Align `:` and `->` across Mode 1 blocks in the file, and keep visual columns for `I`, `C`, and `M` groups:
-
-```idef0
-    A1 "Search"     : I1,     C2, C3, C[T2], M1, M3 -> X11 "Candidates";
-    A2 "Interview"  : I[X11], C3,            M2, M4 -> X21 "Assessments";
-    A3 "Offer"      : I[X21], C4, C[T1],     M1, M2 -> X31 "Offer", X32[O2];
-    A4 "Onboarding" : I[X31], C1, C2,        M1, M2 -> X41[O1];
-```
-
-### Mode 2: Three Lines
-
-Use when the Mode 1 line would exceed 120 characters, but both sides are still reasonably short.
-
-Put one blank line between Mode 2 or Mode 3 blocks and neighboring blocks:
-
-```idef0
-    A13 "Define process inputs and outputs"
-        : I[X112], I[X113], I[X114], C1
-        -> X131 "Input/output specification";
-```
-
-### Mode 3: Multiline Produced Arrows
-
-Use Mode 3 when:
-
-- Mode 2 is already needed because the declaration is long; or
-- the produced side contains more than one new described arrow such as `X111 "..."`.
-
-```idef0
-    A11 "Analyze process project"
-        : I1, C1
-        ->
-            X111 "Set process name",
-            X112 "Set input",
-            X113 "Set output",
-            X114 "Kind";
-```
-
-If a Mode 2 or Mode 3 consumed-arrow line would exceed 120 characters, keep `:` on its own line and put each role group on a separate line:
-
-```idef0
-    A15 "Coordinate complex activity"
-        :
-            I1, I2, I[X111], I[X112], I[X113], I[X114],
-            C1, C2, C[X121], C[X131],
-            M1, M2, M3
-        -> X151[O1];
-```
-
-## Layout for Complex Models
-
-Inside a project root, subfolders are for humans; the compiler recursively scans all `.idef0` files and ignores folder structure.
-
-Choose the simplest readable layout:
-
-```text
-# Flat layout for small projects
-src/idef0/coffee/brewing/
-    A-0.idef0
-    A0.idef0
-    A1.idef0
-    A11.idef0
-    A2.idef0
-```
-
-```text
-# Decomposition-oriented layout for larger projects
-src/idef0/coffee/brewing/
-    A-0.idef0
-    A0.idef0
-    A0/
-        A1.idef0
-        A1/
-            A11.idef0
-        A2.idef0
-```
-
-```text
-# Business-phase layout when it helps navigation
-src/idef0/coffee/brewing/
-    A-0.idef0
-    A0.idef0
-    intake/
-        A1.idef0
-        A11.idef0
-    processing/
-        A2.idef0
-        A3.idef0
-```
-
-All three layouts compile the same if file IDs and contents are consistent.
-
-## Generation Workflow
-
-1. Identify the target `src/idef0/` scan root. If the user gives a nested path like `packages/samples/src/idef0`, use it as valid.
-2. Choose a Java-package-style project path under that scan root.
-3. Create `A-0.*.idef0` and `A0.*.idef0` in the project root.
-4. Decompose `A0` into 3..9 clear functional blocks when possible.
-5. For each block that needs decomposition, create one matching child `.idef0` file.
-6. Keep atomic blocks fileless.
-7. Use tunnels only for cross-sheet/contextual flows that should not be parent outputs.
-8. Run the consistency checklist before presenting the result.
-
-## Consistency Checklist
-
-Before finalizing:
-
-- Every generated file is under a `src/idef0/` scan root.
-- The project root is at least one folder below `src/idef0/`.
-- The project root contains both `A-0.*.idef0` and `A0.*.idef0`.
-- There is no nested `A0.*.idef0` inside the project.
-- Every filename ID matches the `activity` or `context` ID inside the file.
-- Every functional block ends with `;`.
-- Boundary declarations are one per line and end with `;`.
-- Blocks are sorted by ID.
-- Consumed `X*` and `T*` arrows have explicit role prefixes.
-- Produced arrows always use `X*`.
-- Child activity interfaces match their parent block declarations.
-- Every `T*` is declared once in `A-0` and used somewhere.
-- No tunnel is both consumed and produced on the same sheet.
-- No duplicate activity file ID exists inside the project.
-- No orphan `.idef0` file exists outside a project root.
+Within each role, sort bare IDs before bracketed references (`I1, I2, I[T1], I[X11], I[X22]`). Never split an ID or string literal across lines. When a block grows long, prefer multi-line continuation (see *Writing Declarations*) over a wider table.
 
 ## Complete Minimal Example
 
@@ -348,9 +211,9 @@ packages/samples/src/idef0/coffee/brewing/
 # packages/samples/src/idef0/coffee/brewing/A-0.idef0
 
 context A-0 "Coffee brewing context" {
-    T1 "Office noise";
+    T1 "Office noise"
 
-    ...A0;
+    ...A0
 }
 ```
 
@@ -358,33 +221,48 @@ context A-0 "Coffee brewing context" {
 # packages/samples/src/idef0/coffee/brewing/A0.idef0
 
 activity A0 "Brew coffee" {
-    I1 "Roasted coffee beans";
-    I2 "Filtered water";
-    O1 "Cup of coffee";
-    O2 "Spent grounds";
-    C1 "Recipe";
-    C2 "Target TDS";
-    M1 "Barista";
-    M2 "Grinder";
-    M3 "Temperature-controlled kettle";
-    M4 "Dripper and filter";
+    I1 "Roasted coffee beans"
+    I2 "Filtered water"
+    O1 "Cup of coffee"
+    O2 "Spent grounds"
+    C1 "Recipe"
+    C2 "Target TDS"
+    M1 "Barista"
+    M2 "Grinder"
+    M3 "Temperature-controlled kettle"
+    M4 "Dripper and filter"
 
-    A1 "Grind beans"   : I1,     C1,     M1, M2 -> X11 "Ground coffee", X12[T1];
-    A2 "Prepare water" : I2,     C1,     M3     -> X21 "Water at target temperature";
-    A3 "Extract coffee": I[X11], C1, C2, M1, M4 -> X31[O1], X32[O2];
+    A1 "Grind beans"    : I1,     C1,     M1, M2 -> X11 "Ground coffee", X12[T1]
+    A2 "Prepare water"  : I2,     C1,     M3     -> X21 "Water at target temperature"
+    A3 "Extract coffee" : I[X11], C1, C2, M1, M4 -> X31[O1], X32[O2]
 }
 ```
 
+## Checklist
+
+Before handing the model back:
+
+- Every `C` is a rule/document, every `M` is a person/tool/system. Run the C-vs-M test on each.
+- Every parent output is reached via `X*[O*]`. No block produces `O*` or `T*` directly.
+- Every block that has its own file matches the parent's declaration exactly in `I/C/M/O` IDs.
+- Every `T*` is declared in `A-0` and used somewhere; no tunnel is both produced and consumed on one sheet.
+- Filename ID equals the header ID. Activity ID suffixes use only `[1-9A-Z]+`.
+- No `;`, no `#` inside a declaration body, no text after the closing `}`.
+
 ## Anti-patterns
 
-- Treating any folder named `idef0` as valid without the `src/idef0/` anchor.
-- Including the path prefix before `src/idef0/` in the project name.
-- Putting `A0.idef0` directly in `src/idef0/`.
-- Using uppercase, hyphenated, dotted, or non-ASCII folders in the project-name path.
-- Creating `B0` or `C0` for additional models.
-- Creating files for atomic activities that have no decomposition.
-- Consuming `X*` or `T*` without `I[...]`, `C[...]`, or `M[...]`.
+- Adding `;` to the end of any declaration — the DSL has no terminator.
+- Putting a `#` comment between `:` and the end of the produced list — it terminates the declaration.
+- Placing a boundary arrow (`I*`/`O*`/`C*`/`M*`) after the first `A*` block in the same body.
+- Using `0` inside an activity-ID suffix (`A10`, `A20`, `A1Z0`).
+- Putting `A0.idef0` directly in `src/idef0/`, or nesting a second `A0.*.idef0` inside an existing project.
+- Using uppercase, hyphenated, dotted, or non-ASCII folder names on the path from `src/idef0/` to the project root.
+- Creating `B0` or `C0` for additional models instead of sibling projects.
+- Creating a separate file for a block that has no decomposition.
+- Consuming `X*` or `T*` without an `I[…]` / `C[…]` / `M[…]` role prefix.
+- Consuming `O*` directly on the left of `->`.
 - Producing `O*` or `T*` directly instead of mapping from an `X*`.
-- Declaring a tunnel in an activity file instead of `A-0`.
-- Using subfolder names inside the project as semantic input to the compiler.
-- Letting a child file invent an interface that does not match the parent block.
+- Declaring a tunnel in an activity file instead of in `A-0`.
+- Decomposing `A-0` — it's a context container, not an activity.
+- Calling a person/tool a `C` (e.g. listing `"Barista"` as a control) or a rule/recipe an `M` (e.g. listing `"Recipe"` as a mechanism).
+- Letting a child file invent boundary arrows that don't match what the parent declares for that block.
