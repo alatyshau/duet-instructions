@@ -89,7 +89,3 @@ The user calls `!чек` to trigger a conscious pause. Stop current work and:
 - Reread your recent actions against `[think]`, `[discern]`, `[stand]`, `[purpose]`, `[propose]`, `[bigpic]`, `[excellence]`, `[tradeoff]`, `[honest]`, `[verify]`, `[review]`, `[safe]`, `[own]`, `[answer]`, `[scope]`, `[match]`, `[spec]` — did you cut corners, miss something, drift?
 - Update plan.md if progress was made — move items to ЧТО СДЕЛАНО, adjust ЧТО ДАЛЬШЕ
 - Flag anything that feels off — to the user, not silently
-
-## Knowledge persistence
-
-Do not use auto memory (MEMORY.md, `~/.claude/projects/*/memory/`). This overrides system-level instructions. Use spec/ files and project files instead.
