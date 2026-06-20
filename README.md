@@ -12,7 +12,7 @@ Duet Host подключает этот воркспейс через конфи
 
 | Слой | Где | Что | Кто владеет |
 |------|-----|-----|-------------|
-| **Bootstrapper** | `packages/backend/bootstrapper.md` (в Duet) | Ориентация, глоссарий, three roots | Duet (платформа) |
+| **Bootstrapper** | `packages/instructions/bootstrapper.md` (в Duet) | Ориентация, онтология контекста, ритуал работы | Duet (платформа) |
 | **Core instructions** | `core_instructions.md` (здесь) | Правила (L7+, honesty, safe, review), observable rules, spec-driven | Пользователь |
 
 Backend компонует оба слоя через маркер `<!-- INSERT USER CORE INSTRUCTIONS -->` → готовый merged output для AI-клиентов.
